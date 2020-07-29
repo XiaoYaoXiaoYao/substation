@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('项目列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<form id="formId">
+				<div class="select-list">
+					<ul>
+						<li>
+							<label>项目名称：</label>
+							<input type="text" name="projectName"/>
+						</li>
+						<li>
+							<label>项目状态：</label>
+							<select name="projectStatus" th:with="type=${@dict.getType('sys_project_status')}">
+								<option value="">所有</option>
+								<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+							</select>
+						</li>
+						<li  class="select-time">
+							<label>创建时间： </label>
+							<input type="text" class="time-input" id="projectStartTime" placeholder="开始时间" name="projectStartTime"/>
+							<span>-</span>
+							<input type="text" class="time-input" id="projectEndTime" placeholder="结束时间" name="projectEndTime"/>
+						</li>
+
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+			<a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="assignment:project:add" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+				<i class="fa fa-plus"></i> 添加
+			</a>
+			<a class="btn btn-primary single disabled" onclick="$.operate.editTab()" shiro:hasPermission="assignment:project:edit" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+				<i class="fa fa-edit"></i> 修改
+			</a>
+			<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="assignment:project:remove" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+				<i class="fa fa-remove"></i> 删除
+			</a>
+			<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="assignment:project:export" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+				<i class="fa fa-download"></i> 导出
+			</a>
+		</div>
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var editFlag = [[${@permission.hasPermi('assignment:project:edit')}]];
+	var removeFlag = [[${@permission.hasPermi('assignment:project:remove')}]];
+	var uploadFlag = [[${@permission.hasPermi('assignment:project:upload')}]];
+	var detailFlag = [[${@permission.hasPermi('assignment:project:pdetail')}]];
+	var datas = [[${@dict.getType('sys_project_status')}]];
+	var prefix = ctx + "assignment/project";
+	$(function() {
+		var options = {
+			url: prefix + "/list",
+			createUrl: prefix + "/add",
+			uploadUrl: prefix + "/upload/{id}",
+			updateUrl: prefix + "/edit/{id}",
+			detailUrl: prefix + "/pdetail/{id}",
+			removeUrl: prefix + "/remove",
+			exportUrl: prefix + "/export",
+			modalName: "项目",
+			columns: [{
+				checkbox: true
+			},
+				{
+					field: 'projectId',
+					title: '项目编号',
+					sortable: true,
+					align: 'center'
+				},
+				{
+					field: 'projectName',
+					title: '项目名称',
+					sortable: true,
+					formatter: function(value, row, index) {
+						return '<a href="javascript:void(0)" onclick="detail(\'' + row.projectId + '\')">' + value + '</a>';
+					}
+				},
+				{
+					field: 'projectEndTime',
+					title: '项目预计结束时间',
+					sortable: true
+				},
+				{
+					field: 'projectStatus',
+					title: '项目状态:',
+					formatter: function(value, row, index) {
+						//此datas必须和已定义的变量名称相同
+						return $.table.selectDictLabel(datas, value);
+					},
+					sortable: true
+				},
+				{
+					//projectProcess
+					field: 'projectProcess',
+					title: '项目进度',
+					sortable: true,
+					width: 160,
+					formatter:function(value, row, index){
+						//&nbsp;如果不放这个空格的话 页面就不显示了
+						if(value==''||value==null){
+							value=0;
+							return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+						}else if(value>100){
+							value=100;
+							return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+						}else{
+							return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+						}
+					},
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-primary btn-xs ' + uploadFlag + '" href="javascript:void(0)" onclick="$.operate.upload(\'' + row.projectId + '\')"><i class="fa fa-upload"></i>附件</a> ');
+						actions.push('<a class="btn btn-success btn-xs ' + detailFlag + '" href="javascript:void(0)" onclick="$.operate.detailTab(\'' + row.projectId + '\')"><i class="fa fa-edit"></i>详情</a> ');
+						//actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.projectId + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	/*项目列表-详细*/
+	function detail(projectId) {
+		var url = prefix + '/detail/' + projectId;
+		$.modal.openTab("任务列表", url);
+	}
+</script>
+</body>
+</html>

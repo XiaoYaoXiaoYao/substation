@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('测试关联列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="notice-form">
+                <div class="select-list">
+                    <ul>
+<!--                        <li>-->
+<!--                            关联的开发人员：<select name="userId" th:with="associatedCoder=${@defect.selectAssociatedCoderList()}">-->
+<!--                            <option value="">请选择</option>-->
+<!--                            <option th:each="defect : ${associatedCoder}" th:text="${defect.userName}" th:value="${defect.userId}"></option>-->
+<!--                        </select>-->
+<!--                        </li>-->
+
+                        <li>
+                            严重程度：<select name="defectSeverity" th:with="type=${@dict.getType('defect_severity')}">
+                            <option value="">请选择</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            优先级：<select name="defectPriority" th:with="type=${@dict.getType('defect_priority')}">
+                            <option value="">请选择</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            创建者：<select name="createBy" th:with="createBy=${@defect.createByExecutorTesterList()}">
+                            <option value="">请选择</option>
+                            <option th:each="defect : ${createBy}" th:text="${defect.userName}" th:value="${defect.userName}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            所属项目：<select name="projectId" th:with="associatedProject=${@defect.associatedProjectList()}">
+                            <option value="">请选择</option>
+                            <option th:each="defect : ${associatedProject}" th:text="${defect.projectName}" th:value="${defect.projectId}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            BUG类型：<select name="defectType" th:with="type=${@dict.getType('defect_type')}">
+                            <option value="">请选择</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            解决状态:
+                            <div class="radio-box" required>
+                                    <input type="radio" id="151" name="defectStatus" value="2" checked="checked">
+                                <label for="151" >全部</label>
+                            </div>
+                            <div class="radio-box" required>
+
+                                <input type="radio" id="152" name="defectStatus" value="3" checked="checked">
+                                <label for="152" >已关闭</label>
+                            </div>
+
+                            <div class="radio-box" required>
+
+                                    <input type="radio" id="131" name="defectStatus" value="1" checked="checked">
+                                <label for="131" >已解决</label>
+                            </div>
+                            <div class="radio-box" required>
+                                    <input type="radio" id="129" name="defectStatus" value="0" checked="checked" >
+                                <label for="129">待处理</label>
+                            </div>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+<!--            <a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="assignment:defect:add">-->
+<!--                <i class="fa fa-plus"></i> 新增-->
+<!--            </a>-->
+            <a class="btn btn-primary single disabled" onclick="$.operate.editTab()" shiro:hasPermission="assignment:defect:edit"  th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="assignment:defect:remove" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+                <i class="fa fa-remove"></i> 删除
+            </a>
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="assignment:defect:export" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('assignment:defect:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('assignment:defect:remove')}]];
+    var uploadFlag = [[${@permission.hasPermi('assignment:defect:upload')}]];
+    var types = [[${@dict.getType('defect_type')}]];
+    //var severitys = [[${@dict.getType('defect_severity')}]];
+    //var priorities = [[${@dict.getType('defect_priority')}]];
+    var prefix = ctx + "assignment/executor";
+    var prefix_executor = ctx + "assignment/defect";
+    console.log("prefix:-------"+prefix)
+
+
+
+    $(function() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix_executor + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            uploadUrl: prefix_executor + "/upload/{id}",
+            removeUrl: prefix_executor + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "bug",
+            columns: [{
+                checkbox: true
+            },
+                // {
+                //     title : '序号',
+                //     formatter: function (value, row, index) {
+                //         return index+1;
+                //     }
+                // },
+                {
+                    field : 'defectId',
+                    title : 'bug单号',
+                    align: 'center',
+                },
+                {
+                    field : 'defectTitle',
+                    title : 'bug名称',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value);
+                    }
+                },
+                {
+                    field : 'userName',
+                    title : '关联用户',
+                    align: 'center',
+                    // formatter: function(value, row, index) {
+                    //     return filter_user(userIds, value);
+                    // }
+
+
+                },
+                {
+                    field: 'projectName',
+                    title: '所属项目',
+
+                },
+                {
+                    field : 'defectEndTime',
+                    title : '截止日期',
+                    sortable: true
+                },
+                {
+                    field: 'defectType',
+                    title: 'BUG类型',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if(value==1){
+                            return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;\">代码错误</div>";
+                        }
+                        if(value==2){
+                            return "<div style=\"background:#24998d;color:#fff;border-radius:5px;\">界面优化</div>";
+                        }
+                        if(value==3){
+                            return "<div style=\"background:#cb99c5;color:#fff;border-radius:5px;\">设计缺陷</div>";
+                        }
+                        if(value==4){
+                            return "<div style=\"background:#f0d264;color:#fff;border-radius:5px;\">性能问题</div>";
+                        }
+                        if(value==5){
+                            return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;\">安全相关</div>";
+                        }
+                        if(value==5){
+                            return "<div style=\"background:#fa5a;color:#fff;border-radius:5px;\">其他</div>";
+                        }
+
+                    }
+                },
+                {
+                    field: 'defectStatus',
+                    title: '解决状态',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if(value==0){
+                            return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;\">待处理</div>";
+                        }
+                        if(value==1){
+                            return "<div style=\"background:#24998d;color:#fff;border-radius:5px;\">已解决</div>";
+                        }
+                        if(value==3){
+                            return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;\">已关闭</div>";
+                        }
+                    }
+
+                },
+                {
+                    field: 'defectSeverity',
+                    title: '严重程度',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if(value==1){
+                            return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;\">轻微</div>";
+                        }
+                        if(value==2){
+                            return "<div style=\"background:#24998d;color:#fff;border-radius:5px;\">尚可</div>";
+                        }
+                        if(value==3){
+                            return "<div style=\"background:#e46aa3;color:#fff;border-radius:5px;\">严重</div>";
+                        }
+                        if(value==4){
+                            return "<div style=\"background:#e80000;color:#fff;border-radius:5px;\">危险</div>";
+                        }
+
+                    }
+
+                },
+                {
+                    field: 'defectReproSteps',
+                    title: '重现步骤',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value);
+                    }
+                },
+                {
+                    field: 'defectPriority',
+                    title: '优先级',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if(value==1){
+                            return "<div style=\"background:#24998d;color:#fff;border-radius:5px;\">不急</div>";
+                        }
+                        if(value==2){
+                            return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;\">普通</div>";
+                        }
+                        if(value==3){
+                            return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;\">紧急</div>";
+                        }
+
+                    }
+
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者',
+                    sortable: true
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateBy',
+                    title: '更新者',
+                    sortable: true
+                },
+                {
+                    field: 'fileName',
+                    title: '附件',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        let filePath = row.filePath;
+                        if (filePath == null) {
+                           return ;
+
+                        }
+                        var  url=filePath;
+                        return  '<a href='+url+' target='+'_blank'+'>'+ value +'</a>'
+
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    width: 590,
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.editTab(\'' + row.defectId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        //actions.push('<a class="btn btn-primary btn-xs ' + uploadFlag + '" href="javascript:void(0)" onclick="$.operate.upload(\'' + row.defectId + '\')"><i class="fa fa-upload"></i>上传附件</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.defectId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    function editBug(id) {
+        //alert(id);
+        $.ajax({
+            url: prefix + "/ifTester/"+id,
+            type: 'post',
+            dataType: "json",
+            cache: false,
+            data:{},
+            contentType: "application/json;charset=UTF-8",
+            success: function(result) {
+                if (result.code==500) {
+                    //alert(result.msg);
+                    $.modal.alertError(result.msg);
+                    return
+                }
+                $.operate.editTab(id);
+            }
+        });
+
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('任务列表')" />
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="notice-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								任务名称：<input type="text" id="taskTitle" placeholder="需要查询的任务名称" name="taskTitle"/>
+							</li>
+							<li>
+								所属项目：<select name="projectId" th:with="associatedProject=${@defect.associatedProjectList()}">
+								<option value="">请选择</option>
+								<option th:each="defect : ${associatedProject}" th:text="${defect.projectName}" th:value="${defect.projectId}"></option>
+							</select>
+							</li>
+							<li>
+								任务类型：<select name="taskType" id="taskType">
+									<option value="">所有</option>
+									<option value="1">开发</option>
+									<option value="2">设计</option>
+									<option value="3">测试</option>
+									<option value="4">发布</option>
+								</select>
+							</li>
+							<li>
+								任务状态：<select id="taskStatus" name="taskStatus">
+									<option value="">请选择</option>
+									<option value="1">创建任务</option>
+									<option value="2">开始任务</option>
+									<option value="3">提交任务</option>
+									<option value="4">任务审核</option>
+									<option value="5">任务结束</option>
+								</select>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+	        <div class="btn-group-sm" id="toolbar" role="group">
+		        <a class="btn btn-success" onclick="$.operate.addTab()" shiro:hasPermission="assignment:task:add" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+		            <i class="fa fa-plus"></i> 新增
+		        </a>
+<!--		        <a class="btn btn-primary single disabled" onclick="$.operate.editFull()" shiro:hasPermission="assignment:task:edit">-->
+<!--		            <i class="fa fa-edit"></i> 修改-->
+<!--		        </a>-->
+<!--		        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="assignment:task:remove">-->
+<!--		            <i class="fa fa-remove"></i> 删除-->
+<!--		        </a>-->
+				<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="assignment:task:export" th:if="${@defect.getPrincipalRoleKey() != 'admin'  }">
+					<i class="fa fa-download"></i> 导出
+				</a>
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+	            <table id="bootstrap-table"></table>
+	        </div>
+    	</div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('assignment:task:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('assignment:task:remove')}]];
+		var uploadFlag = [[${@permission.hasPermi('assignment:task:upload')}]];
+        // var types = [[${@dict.getType('sys_notice_type')}]];
+        // var datas = [[${@dict.getType('sys_notice_status')}]];
+        var prefix = ctx + "assignment/task";
+        console.log("prefix:-------"+prefix)
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+				uploadUrl: prefix + "/upload/{id}",
+                removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+                modalName: "任务",
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					// field : 'taskId',
+					title : '序号',
+					formatter: function (value, row, index) {
+						return index+1;
+					}
+				},
+				{
+					field : 'taskId',
+					title : '单号'
+				},
+				{
+					field : 'taskTitle',
+					title : '任务名称',
+					formatter: function(value, row, index) {
+						return $.table.tooltip(value);
+					}
+				},
+				{
+					field: 'taskType',
+					title: '任务类型',
+					align: 'center',
+					formatter: function(value, row, index) {
+						if(value==1){
+							return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;text-align: center;\">开发</div>";
+						}
+						if(value==2){
+							return "<div style=\"background:#24998d;color:#fff;border-radius:5px;text-align: center;\">设计</div>";
+						}
+						if(value==3){
+							return "<div style=\"background:#cb99c5;color:#fff;border-radius:5px;text-align: center;\">测试</div>";
+						}
+						if(value==4){
+							return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;text-align: center;\">发布</div>";
+						}
+					}
+				},
+				{
+					field : 'taskStatus',
+					title : '任务状态',
+					sortable:true,
+					formatter: function(value, row, index) {
+						if(value==1){
+							return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;text-align: center;\">创建任务</div>";
+						}
+						if(value==2){
+							return "<div style=\"background:#24998d;color:#fff;border-radius:5px;text-align: center;\">开始任务</div>";
+						}
+						if(value==3){
+							return "<div style=\"background:#cb99c5;color:#fff;border-radius:5px;text-align: center;\">提交任务</div>";
+						}
+						if(value==4){
+							return "<div style=\"background:#f0d264;color:#fff;border-radius:5px;text-align: center;\">任务审核</div>";
+						}
+						if(value==5){
+							return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;text-align: center;\">任务结束</div>";
+						}
+					}
+				},
+				{
+					field : 'projectName',
+					title : '所属项目',
+					sortable:true,
+					formatter: function(value, row, index) {
+						return $.table.tooltip(value);
+					}
+					// formatter: function(value, row, index) {
+					// 	return '<div style=\"width:80px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;\">'+ value +'</a>';
+					// }
+				},{
+					field : 'userName',
+					title : '关联人员'
+				},{
+					field : 'taskProgress',
+					title : '当前进度',
+					sortable:true,
+						width: 50,
+						formatter:function(value, row, index){
+							//&nbsp;如果不放这个空格的话 页面就不显示了
+							if(value<0){
+								value=0;
+								return '<div style="float:left;background:#f6941d;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+							}else if(value>100){
+								value=100;
+								return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+							}else if(value>0&&value<50) {
+								return '<div style="float:left;background:#0080ff;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+							}
+							else{
+								return '<div style="float:left;background:#24998d;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+							}
+						}
+				},{
+					field : 'taskStartTime',
+					title : '开始日期',
+					sortable:true
+				},{
+                	field : 'taskEndTime',
+					title : '截止日期',
+					sortable:true
+				},{
+                	field : 'createBy',
+					title : '创建者'
+				},{
+                	field : 'updateBy',
+					title : '更新者'
+				},{
+                	field : 'updateTime',
+					title : '更新时间',
+					sortable:true
+					}
+					//,{
+                // 	field : 'remark',
+				// 	title : '备注',
+				// 	formatter: function(value, row, index) {
+                // 		if (value==''||value==null){
+                // 			return ;
+				// 		}else {
+				// 			return '<div style=\"width:30px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;\">'+ value +'</a>';
+				// 		}
+				// 	}// }
+				,{
+                	field : 'fileName',
+					title : '附件名',
+					formatter: function(value, row, index) {
+						let filePath = row.filePath;
+						if (filePath == null) {
+							return ;
+						}
+						var  url=filePath;
+						return  '<a href='+url+' target='+'_blank'+'>'+ value +'</a>'
+					}
+				},
+		        {
+		            title: '操&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作',
+		            align: 'center',
+					width: 160,
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+		            	actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.editTab(\'' + row.taskId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+		            	actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.taskId + '\')"><i class="fa fa-remove"></i>删除</a>');
+						// actions.push('<a class="btn btn-primary btn-xs ' + uploadFlag + '" href="javascript:void(0)" onclick="$.operate.upload(\'' + row.taskId + '\')"><i class="fa fa-upload"></i>上传附件</a> ');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改项目')" />
+    <th:block th:include="include :: select2-css" />
+</head>
+<body>
+<div class="main-content">
+    <form class="form-horizontal" id="form-project-edit" th:object="${Project}">
+        <input name="projectId" th:field="*{projectId}" type="hidden">
+        <h4 class="form-header h4">基本信息</h4>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label is-required">项目名称：</label>
+                    <div class="col-sm-8">
+                        <input name="projectName" placeholder="请输入项目名称" class="form-control" type="text" maxlength="30" th:field="*{projectName}" readonly="readonly" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label is-required">部门组长：</label>
+                    <div class="col-xs-8">
+                        <select id="userId" name="userId"  th:with="user=${@userService.selectUserRole()}" class="form-control select2-multiple" required>
+                            <option style='display: none'></option>
+                            <option th:each="u : ${user}" disabled="disabled" th:text="${u.userName}"  th:value="${u.userId}" th:field="*{userId}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label is-required">测试人员：</label>
+                    <div class="col-xs-8">
+                        <select id="testerId" name="testerId" class="form-control select2-multiple" multiple>
+                            <option th:each="user:${users}" disabled="disabled" th:value="${user.userId}" th:text="${user.userName}" th:selected="${user.flag}" ></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label is-required">项目预计开始时间：</label>
+                    <div class="col-sm-8">
+                        <input name="projectStartTime" th:disabled="true" class="protime-input" type="text" placeholder="请选择开始时间" th:field="*{projectStartTime}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label is-required">项目预计结束时间：</label>
+                    <div class="col-sm-8">
+                        <input name="projectEndTime" th:disabled="true" class="protime-input" type="text" placeholder="请选择结束时间" th:field="*{projectEndTime}" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label is-required">项目进度：</label>
+                    <div class="col-sm-8">
+                        <input name="projectProcess" readonly="readonly" class="form-control" id="process" type="text" value="0"  th:field="*{projectProcess}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">项目优先级：</label>
+                    <div class="col-sm-8">
+                        <input name="projectPriority" readonly="readonly" class="form-control" placeholder="请输入项目的优先级" maxlength="10" type="text" th:field="*{projectPriority}" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label is-required">项目阶段：</label>
+                    <div class="col-xs-10">
+                        <label class="radio-box"  th:each="dict : ${@dict.getType('sys_project_stage')}">
+                            <input type="radio"  th:id="${dict.dictCode}" disabled="disabled" name="projectStage" th:value="${dict.dictValue}" th:checked="${dict.default}" th:field="*{projectStage}" required>
+                            <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label is-required">项目类型：</label>
+                    <div class="col-xs-10">
+                        <label class="radio-box"  th:each="dict : ${@dict.getType('sys_project_type')}">
+                            <input type="radio" th:id="${dict.dictCode}" disabled="disabled" name="projectType" th:value="${dict.dictValue}" th:checked="${dict.default}" th:field="*{projectType}" required>
+                            <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label is-required">项目状态：</label>
+                    <div class="col-xs-10">
+                        <label class="radio-box" th:each="dict : ${@dict.getType('sys_project_status')}">
+                            <input type="radio" th:id="${dict.dictCode}" disabled="disabled" name="projectStatus" th:value="${dict.dictValue}" th:checked="${dict.default}" th:field="*{projectStatus}" required>
+                            <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h4 class="form-header h4">其他信息</h4>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-xs-4 control-label is-required">项目描述：</label>
+                    <div class="col-xs-8">
+                        <input name="projectDescription" readonly="readonly" placeholder="请输入项目描述" maxlength="20" class="form-control" type="text" th:field="*{projectDescription}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">项目结束时间：</label>
+                    <div class="col-sm-8">
+                        <input name="projectRealEndTime" th:disabled="true" class="protime-input" type="text" disabled="disabled" placeholder="请选择结束时间" th:field="*{projectRealEndTime}" >
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-xs-4 control-label">项目版本号：</label>
+                    <div class="col-xs-8">
+                        <input name="softwareVersion" readonly="readonly" class="form-control" type="text" placeholder="请输入项目版本号" maxlength="20" th:field="*{softwareVersion}" >
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">SVN地址：</label>
+                    <div class="col-sm-8">
+                        <input name="svnPath" class="form-control" readonly="readonly" type="text" placeholder="请输入svn地址" maxlength="40" th:field="*{svnPath}" >
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label">备注：</label>
+                    <div class="col-xs-10">
+                        <textarea name="remark" maxlength="500" readonly="readonly" class="form-control" rows="3" th:field="*{remark}"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="col-sm-offset-5 col-sm-10">
+        <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: select2-js" />
+
+</body>
+</html>

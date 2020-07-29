@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改任务')" />
+	<th:block th:include="include :: select2-css" />
+</head>
+<body>
+    <div class="main-content">
+        <form id="form-task-edit" class="form-horizontal" th:object="${task}">
+            <input name="taskId" type="hidden" id="taskId" th:field="*{taskId}" />
+            <h4 class="form-header h4">任务信息</h4>
+            <div class="row">
+            	<div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">任务名称：</label>
+                        <div class="col-sm-8">
+                            <input id="roleFlag" type="hidden" th:value="${roleKey}">
+                            <input id="grouperCurId" type="hidden" th:value="${curProjects.projectId}">
+                            <input id="grouperCurName" type="hidden" th:value="${curProjects.projectName}">
+                            <input name="taskTitle" placeholder="请输入任务名称" class="form-control" type="text" maxlength="30" th:field="*{taskTitle}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group" th:if="${roleKey ne 'grouper'}">
+                        <input id="curId" type="hidden" th:value="${curProjects.projectId}">
+                        <label class="col-xs-2 control-label is-required">所属项目：</label>
+                        <div class="col-xs-8">
+                            <input id="otherProject" class="form-control" type="text" th:value="${curProjects.projectName}" maxlength="30" required>
+                        </div>
+                    </div>
+                    <div class="form-group" th:if="${roleKey eq 'grouper'}">
+                        <label class="col-xs-2 control-label is-required">所属项目：</label>
+                        <div class="col-xs-8">
+                            <select id="post" class="form-control is-required select2-multiple">
+                                <option th:each="project:${projects}" th:value="${project.projectId}" th:text="${project.projectName}" th:selected="${project.projectId==curProjects.projectId}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">任务类型：</label>
+                        <div class="col-sm-8">
+                            <select id="task_type" class="form-control is-required select2-multiple" required>
+                                <option th:selected="${task.taskType=='1'}" value="1">开发</option>
+                                <option th:selected="${task.taskType=='2'}" value="2">设计</option>
+                                <option th:selected="${task.taskType=='3'}" value="3">测试</option>
+                                <option th:selected="${task.taskType=='4'}" value="4">发布</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label is-required">关联人员：</label>
+                        <div class="col-xs-8">
+                            <select id="user" class="form-control is-required select2-multiple" required>
+                                <option th:each="user:${users}" th:value="${user.userId}" th:text="${user.userName}" th:selected="${curUser.userId==user.userId}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">开始日期：</label>
+                        <div class="col-sm-8">
+                            <input name="task_start_time" class="protime-input" type="text" th:value="*{#dates.format(taskStartTime,'yyyy-MM-dd')}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label is-required">截止日期：</label>
+                        <div class="col-xs-8">
+                            <input name="task_end_time" class="protime-input" type="text" th:value="*{#dates.format(taskEndTime,'yyyy-MM-dd')}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">进度百分比：</label>
+                        <div class="col-sm-8">
+                            <input id="task_percent" name="task_percent" placeholder="请输入任务进度百分比" class="form-control" type="text" maxlength="30" th:field="*{taskProgress}" range:[5,10] required>
+                        </div>
+                    </div>
+                </div>
+<!--                <div class="col-sm-6">-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="col-xs-2 control-label">选择附件：</label>-->
+<!--                        <div class="col-xs-8">-->
+<!--                            <input name="task_file" placeholder="请选择附件" class="form-control" type="file">-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-sm-6">-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="col-xs-2 control-label is-required">任务状态：</label>-->
+<!--                        <div class="col-xs-8">-->
+<!--                            <select id="task_a" class="form-control is-required select2-multiple" required>-->
+<!--                                <option th:selected="${task.taskStatus=='1'}" value="1">创建任务</option>-->
+<!--                                <option th:selected="${task.taskStatus=='2'}" value="2">开始任务</option>-->
+<!--                                <option th:selected="${task.taskStatus=='3'}" value="3">提交任务</option>-->
+<!--                                <option th:selected="${task.taskStatus=='4'}" value="4">任务审核</option>-->
+<!--                                <option th:selected="${task.taskStatus=='5'}" value="5">任务结束</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+            <h4 class="form-header h4">其他信息</h4>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label is-required">备注：</label>
+                        <div class="col-xs-10">
+                            <textarea id="remark" name="remark" maxlength="200" class="form-control" rows="3" th:field="*{remark}"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" th:if="${roleKey ne 'tester'}">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">附件：</label>
+                        <div class="col-sm-8" >
+                            <a class="btn btn-primary btn-xs"   href="javascript:void(0)" onclick="uploadFile();" style="display: block">
+                                <i class="fa fa-upload"></i>上传附件
+                            </a>
+                            <input class="form-control" type="hidden" name="fileId" id="fileId"  readonly  value=""  th:field="*{fileId}">
+                            <input class="form-control" type="text" name="fileId_hidden" id="fileId_hidden"  readonly  value="" style="display: block" th:field="*{fileName}" >
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <h4 class="form-header h4" th:if="${roleKey ne 'tester'}">上传附件</h4>
+        <form class="form-horizontal m " id="form-task-upload"  method="post" enctype="multipart/form-data"  style="display: none" data-id="file_upload" th:if="${roleKey ne 'tester'}" >
+            <!-- 文件上传的form，method必须是post， enctype需要指定二进制方式提交form表单中的数据 -->
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">项目编号：</label>
+                <div class="col-sm-8">
+                    <input name="projectId"  id="projectId" type="text"  readonly="readonly" th:value="${curProjects.projectId}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">项目名称：</label>
+                <div class="col-sm-8">
+                    <input name="projectName"   id="projectName" type="text"  readonly="readonly" th:value="${curProjects.projectName}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">文件名：</label>
+                <div class="col-sm-8">
+                    <input name="fileName"   id="fileName" class="form-control"   placeholder="请填写附件名" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">文件级别：</label>
+
+                <div class="col-sm-8">
+                    <div class="radio-box" >
+                        <input type="radio" id="149" name="fileLevel" value="1" checked="checked"     required  >
+                        <label for="149">项目级别</label>
+                    </div>
+
+                    <div class="radio-box" >
+                        <input type="radio" id="150" name="fileLevel" value="2"   >
+                        <label for="150">任务级别</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">备注：</label>
+                <div class="col-sm-8">
+                    <input name="remark"   id="file_remark" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group" th:if="${roleKey ne 'tester'}">
+                <!-- 必填 -->
+                <label class="col-sm-3 control-label is-required">文件路径：</label>
+                <div class="col-sm-8">
+                    <input name="filePath" id="filePath" class="form-control" type="file" required>
+                </div>
+            </div>
+
+            <div class="row" th:if="${roleKey ne 'tester'}">
+                <div class="col-sm-offset-5 col-sm-10">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler_upload()"><i class="fa fa-check"></i>上传</button>&nbsp;
+                    <button type="button" class="btn btn-sm btn-danger" onclick="closeItem_upload()"><i class="fa fa-reply-all"></i>关 闭 </button>
+                </div>
+            </div>
+        </form>
+    </div>
+      
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+            <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+        </div>
+    </div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: select2-js" />
+	<script>
+	    var prefix = ctx + "assignment/task";
+        /**
+         *在修改之前判断用户角色
+         * @type {undefined|*|jQuery.$element|jQuery}
+         */
+	    var flag = $("#roleFlag").val();
+	    if (flag!='grouper'){
+            $("input[name='taskTitle']").attr({ readonly: 'true' });
+            $("input[name='task_start_time']").attr({ disabled: 'true' });
+            $("input[name='task_end_time']").attr({ disabled: 'true' });
+            $("#task_type").attr({ disabled: 'true' });
+            $("#user").attr({ disabled: 'true' });
+            $("#post").attr({ disabled: 'true' });
+            $("#post").attr({ disabled: 'true' });
+            $("#otherProject").attr({ disabled: 'true' });
+        }
+	    if (flag=='grouper'){
+            $("#task_percent").attr("readonly","readonly");
+        }
+        //左下方保存按钮点击事件
+        function submitHandler() {
+            if ($.validate.form()) {
+                add();
+            }
+        }
+        function add() {
+            var taskId= $("input[name='taskId']").val();
+            var taskTitle = $("input[name='taskTitle']").val();
+            var taskProgress = $("#task_percent").val();
+            var taskStartTime = $("input[name='task_start_time']").val();
+            var taskEndTime = $("input[name='task_end_time']").val();
+            var taskStatus = $("#task_a option:selected").val();
+            var taskType = $("#task_type option:selected").val();
+            var userId = $("#user option:selected").val();
+            var projectId = $("#grouperCurId").val();
+            var taskPercent = $("#task_percent").val();
+            // var projectId = $("#post option:selected").val();
+            var remark = $("#remark").val();
+            var fileId= $('#fileId').val();
+            if (taskPercent<0||taskPercent>100){
+                $.modal.alertError("进度只能介于0至100之间！");
+                return;
+            }
+            $.ajax({
+                cache : true,
+                type : "POST",
+                url : ctx + "assignment/task/edit",
+                data : {
+                    "taskId": taskId,
+                    "taskTitle": taskTitle,
+                    "taskProgress": taskProgress,
+                    "taskStartTime": taskStartTime,
+                    "taskEndTime": taskEndTime,
+                    "taskStatus": taskStatus,
+                    "projectId": projectId,
+                    "taskType": taskType,
+                    "userId": userId,
+                    "remark": remark,
+                    "fileId": fileId
+                },
+                async : false,
+                error : function(request) {
+                    $.modal.alertError("系统错误");
+                },
+                success : function(data) {
+                    $.operate.successCallback(data);
+                }
+            });
+        }
+
+	    //名称下拉框
+        $(function() {
+            $('#post').select2({
+                placeholder: "请选择项目名称",
+                allowClear: true
+            });
+        })
+        //任务类型下拉框
+        $(function() {
+            $('#task_type').select2({
+                placeholder: "请选择任务类型",
+                allowClear: true
+            });
+        })
+        //开发人员下拉框
+        $(function() {
+            $('#user').select2({
+                placeholder: "请选择开发人员",
+                allowClear: true
+            });
+        })
+        $().ready(function() {
+            //一些表单验证
+            $("#form-task-edit").validate({
+                rules:{
+                    onkeyup: false,
+                    taskTitle:{
+                        minlength: 2,
+                        maxlength: 20
+                    },
+                    task_percent:{
+                        range:[0,100]
+                    }
+                },
+                message:{
+                    task_percent: {
+                        range: "0-100"
+                    }
+                },
+                focusCleanup: true
+            })
+        });
+
+        function uploadFile() {
+            //首先进行判断新增的时候的所属项目已经选择了
+            //拿到选取的项目的值
+            var  projectId=$("#post option:selected").val();
+            //	alert(projectId);
+            if (projectId == '') {
+                //说明还没有选择所属的项目
+                $.modal.alert("请先选择所属的项目");
+            }else {
+                //所属的项目已经选择了,显示上传附件的form表单
+                //进行数据的清空
+                document.getElementById('projectId').value='';
+                document.getElementById('projectName').value='';
+                document.getElementById('fileName').value='';
+                document.getElementById('filePath').value='';
+                document.getElementById('form-task-upload').style.display='';
+                //首先根据所选的项目回显项目编号和项目名称
+                // var projectId=;
+                var projectId=$('#curId').val();
+                var projectName=$('#otherProject').val();
+                var gProjectId=$('#grouperCurId').val();
+                var gProjectName=$('#grouperCurName').val();
+                if (flag=='grouper'){
+                    $('#projectId').val(gProjectId);
+                    $('#projectName').val(gProjectName);
+                }else{
+                    $('#projectId').val(projectId);
+                    $('#projectName').val(projectName);
+                }
+                // document.getElementById('projectId').value=$('#curId').val();
+                // document.getElementById('projectName').value=$('#otherProject').val();
+                $.modal.alert("请使用压缩包上传附件!!!");
+            }
+        };
+        function closeItem_upload() {
+            document.getElementById('form-task-upload').style.display='none';
+
+        }
+        function submitHandler_upload() {
+            if ($.validate.form("form-task-upload")) {
+                const formData = new FormData();
+                //debugger
+                //alert($("#svnPath").val());
+                //alert($('#filePath')[0].files[0]);
+                const file = $('#filePath')[0].files[0];
+                const fileObj = $('#form-task-upload').serialize() + "";
+
+                formData.append('fileObj',fileObj);
+                formData.append('file',file );
+                $.ajax({
+                    url: prefix + "/upload",
+                    type: 'post',
+                    dataType: "json",
+                    cache: false,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(result) {
+                        var projectName_upload = result.data.fileId;
+                        var projectName_upload_fileName = result.data.fileName;
+                        // alert(result.data.fileId)
+                        // alert(result.data.fileName)
+                        $('#fileId').val(projectName_upload);
+                        $('#fileId_hidden').val(projectName_upload_fileName);
+                        // document.getElementById('').value=;
+                        // document.getElementById('fileId_hidden').value=projectName_upload_fileName;
+                        //alert(document.getElementById('fileId').value)
+
+                        //document.getElementById('fileId').text=projectName_upload_fileName;
+                        document.getElementById('form-task-upload').style.display='none';
+                        //$.modal.alert("附件上传成功!!!" +projectName_upload)
+
+
+                    }
+                });
+            }
+            // if ($.validate.form("form-defect-upload")) {
+            // 	$.operate.save(prefix + "/upload", $('#form-defect-upload').serialize());
+            //
+            // }
+        }
+    </script>
+</body>
+</html>

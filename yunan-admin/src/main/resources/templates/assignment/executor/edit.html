@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改bug')"/>
+    <th:block th:include="include :: datetimepicker-css" />
+    <th:block th:include="include :: datetimepicker-js" />
+</head>
+<body class="white-bg">
+
+<div class="main-content">
+    <form class="form-horizontal m" id="form-job-edit" th:object="${defect}">
+        <h4 class="form-header h4">基本信息</h4>
+        <div class="row">
+            <input id="defectId" name="defectId" type="hidden" th:field="*{defectId}">
+            <input type="hidden" name="updateBy" th:value="${@permission.getPrincipalProperty('userName')}">
+            <input type="hidden" name="createBydfasjf"    id="createBydfasjf" th:field="*{createBy}">
+            <input id="roleFlag" type="hidden" th:value="${roleKey}">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group" >
+                        <label class="col-sm-4 control-label ">BUG名称：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" name="defectTitle" id="defectTitle"
+                                   th:field="*{defectTitle}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label ">BUG截止日期：</label>
+                        <div class="col-xs-8" >
+                            <input class="form-control protime-input-bug " type="text" name="defectEndTime" id="defectEndTime"
+                                   th:field="*{defectEndTime}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group" >
+                        <label class="col-sm-4 control-label ">所属项目：</label>
+                        <div class="col-sm-8">
+                            <select name="projectId"  id="project" class="form-control m-b"
+                                    th:with="associatedProject=${@defect.associatedProjectList()}"  required>
+                                <option value="">请选择</option>
+                                <option th:each="defect : ${associatedProject}" th:text="${defect.projectName}"
+                                        th:value="${defect.projectId}" th:field="*{projectId}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group"   >
+                        <label class="col-xs-2 control-label ">关联用户：</label>
+                        <div class="col-xs-8">
+                            <select name="userId"  id="user" class="form-control m-b"
+                                    th:with="associatedCoder=${@defect.selectAssociatedCoderList()}"  required>
+                                <option value="">请选择项目下的人员</option>
+                                <option th:value="${defect.userId}"   th:text="${defect.userName}" th:field="*{userId}"></option>
+                            </select>
+<!--                            <span class="help-block m-b-none"><i class="fa fa-info-circle"></i>修改用户,需要重新选择项目</span>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group ">
+                        <label class="col-sm-4 control-label ">BUG类型：</label>
+                        <div class="col-sm-8">
+                            <select name="defectType"  id="defectType" class="form-control m-b"
+                                    th:with="type=${@dict.getType('defect_type')}"  required>
+                                <option value="">请选择</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}" th:field="*{defectType}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label is-required">解决状态：</label>
+                        <div class="col-xs-8">
+                            <div class="radio-box" th:each="dict : ${@dict.getType('defect_status')}">
+                                <input type="radio" th:id="${dict.dictCode}" name="status"   id="status" th:value="${dict.dictValue}"
+                                       th:field="*{defectStatus}"  required>
+                                <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label ">严重程度：</label>
+                        <div class="col-sm-8">
+                            <select name="defectSeverity"  id="defectSeverity" class="form-control m-b"
+                                    th:with="type=${@dict.getType('defect_severity')}"  required>
+                                <option value="">请选择</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}" th:field="*{defectSeverity}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label ">优先级：</label>
+                        <div class="col-xs-8">
+                            <select name="defectPriority" class="form-control m-b"
+                                    th:with="type=${@dict.getType('defect_priority')}" id="defectPriority">
+                                <option value="">请选择</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}" th:field="*{defectPriority}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label ">重现步骤：</label>
+                        <div class="col-sm-8">
+                            <textarea id="defectReproSteps" name="defectReproSteps" class="form-control"
+                                      th:field="*{defectReproSteps}"  required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label">备注：</label>
+                        <div class="col-xs-8">
+                            <textarea name="remark"  id="remark" maxlength="500" class="form-control" rows="3" th:field="*{remark}" ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">附件：</label>
+                    <div class="col-sm-8" >
+                        <a class="btn btn-primary btn-xs"   href="javascript:void(0)" onclick="uploadFile();" style="display: block">
+                            <i class="fa fa-upload"></i>上传附件
+                        </a>
+                        <input class="form-control" type="hidden" name="fileId" id="fileId"  readonly  value=""  th:field="*{fileId}">
+                        <input class="form-control" type="text" name="fileId_hidden" id="fileId_hidden"  readonly  value=""  style="display: block" th:field="*{fileName}" >
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</form>
+</div>
+<div class="row">
+    <div class="col-sm-offset-5 col-sm-10">
+        <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存
+        </button>&nbsp;
+        <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭
+        </button>
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<script type="text/javascript">
+    var prefix = ctx + "assignment/executor";
+
+        $("input[name='defectTitle']").attr({ readonly: 'true' });
+        $("input[name='defectEndTime']").attr({ disabled: 'true' });
+        $("#project").attr({ disabled: 'true' });
+        $("#user").attr({ disabled: 'true' });
+        $("#defectType").attr({ disabled: 'true' });
+        $("#defectSeverity").attr({ disabled: 'true' });
+        $("#defectPriority").attr({ disabled: 'true' });
+        $("#defectReproSteps").attr({ disabled: 'true' });
+        $("#remark").attr({ disabled: 'true' });
+
+    $("#form-job-edit").validate({
+        onkeyup: false,
+        rules: {
+            cronExpression: {
+                required: true,
+                remote: {
+                    url: prefix + "/checkCronExpressionIsValid",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        "cronExpression": function () {
+
+                            return $.common.trim($("#cronExpression").val());
+                        }
+                    },
+                    dataFilter: function (data, type) {
+                        return data;
+                    }
+                }
+            },
+        },
+        messages: {
+            "cronExpression": {
+                remote: "表达式不正确"
+            }
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/edit", $('#form-job-edit').serialize());
+        }
+    }
+
+
+</script>
+</body>
+</html>

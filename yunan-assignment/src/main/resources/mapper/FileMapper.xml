@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunan.assignment.mapper.FileMapper">
+    
+    <resultMap type="File" id="FileResult">
+        <result property="fileId"    column="file_id"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="filePath"    column="file_path"    />
+        <result property="fileLevel"    column="file_level"    />
+        <result property="projectId"    column="project_id"    />
+    </resultMap>
+
+    <sql id="selectFileVo">
+        select file_id, file_name, file_type, remark, create_by, update_by, update_time, create_time, file_path, file_level, project_id from manage_file
+    </sql>
+    <insert id="insertFile" parameterType="File">
+        insert into manage_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">file_name,</if>
+            <if test="fileType != null">file_type,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="filePath != null and filePath != ''">file_path,</if>
+            <if test="fileLevel != null and fileLevel != ''">file_level,</if>
+            <if test="projectId != null and projectId != ''">project_id,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">#{fileName},</if>
+            <if test="fileType != null">#{fileType},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="filePath != null and filePath != ''">#{filePath},</if>
+            <if test="fileLevel != null and fileLevel != ''">#{fileLevel},</if>
+            <if test="projectId != null and projectId != ''">#{projectId},</if>
+            sysdate()
+         </trim>
+    </insert>
+
+    <update id="updateFile" parameterType="File">
+        update manage_file
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileType != null and fileType != ''">file_type = #{fileType},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="fileLevel != null and fileLevel != ''">file_level = #{fileLevel},</if>
+            <if test="filePath != null and filePath != ''">file_path = #{filePath},</if>
+            update_time = sysdate()
+        </trim>
+        where file_name = #{fileName}
+    </update>
+    <select id="selectFileByProjectId" resultMap="FileResult" parameterType="string">
+        <include refid="selectFileVo"/>
+        where project_id = #{projectId}
+
+    </select>
+    <select id="selectFileByFile" resultType="com.yunan.assignment.domain.File">
+        select  *  from  manage_file
+        <where>
+            <if test="fileName != null and fileName != ''">
+                AND file_name = #{fileName}
+            </if>
+            <if test="fileType != null">
+                AND file_type=#{fileType}
+            </if>
+            <if test="remark != null">
+                AND remark=#{remark}
+            </if>
+            <if test="createBy != null and createBy != ''">
+                AND create_by=#{createBy}
+            </if>
+            <if test="filePath != null and filePath != ''">
+                AND file_path=#{filePath}
+            </if>
+            <if test="fileLevel != null and fileLevel != ''">
+                AND file_level=#{fileLevel}
+            </if>
+            <if test="projectId != null and projectId != ''">
+                AND project_id=#{projectId}
+            </if>
+        </where>
+
+    </select>
+    <delete id="deleteFileById" parameterType="String">
+        delete from manage_file where project_id = #{projectId}
+    </delete>
+
+    <delete id="deleteFileByIds" parameterType="String">
+        delete from manage_file where project_id in
+        <foreach item="projectId" collection="array" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+    <select id="selectFileByProjectIdAndFileType" resultType="com.yunan.assignment.domain.File">
+        <include refid="selectFileVo"/>
+        where project_id = #{projectId} and file_type= #{fileType}
+    </select>
+
+    <select id="checkFileNameUnique" resultType="com.yunan.assignment.domain.File" parameterType="string">
+        select file_id, file_name from manage_file where file_name=#{fileName}
+    </select>
+    <select id="selectFileByProjectIdAndFileTypeAndLevel" resultType="com.yunan.assignment.domain.File">
+        <include refid="selectFileVo"/>
+        where project_id = #{projectId} and file_type= #{fileType} and file_level=#{file_level}
+    </select>
+
+
+</mapper>

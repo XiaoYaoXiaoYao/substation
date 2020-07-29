@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunan.assignment.mapper.ManageTaskMapper">
+  <resultMap id="BaseResultMap" type="com.yunan.assignment.domain.ManageTask">
+    <!--@mbg.generated-->
+    <!--@Table manage_task-->
+    <id column="task_id" jdbcType="INTEGER" property="taskId" />
+    <result column="task_title" jdbcType="VARCHAR" property="taskTitle" />
+    <result column="task_status" jdbcType="INTEGER" property="taskStatus" />
+    <result column="project_id" jdbcType="VARCHAR" property="projectId" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="task_progress" jdbcType="INTEGER" property="taskProgress" />
+    <result column="task_start_time" jdbcType="VARCHAR" property="taskStartTime" />
+    <result column="task_type" jdbcType="VARCHAR" property="taskType" />
+    <result column="task_end_time" jdbcType="VARCHAR" property="taskEndTime" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="total" jdbcType="VARCHAR" property="total" />
+    <result column="project_name" jdbcType="VARCHAR" property="projectName" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="file_id" jdbcType="INTEGER" property="fileId" />
+    <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+    <result column="file_path" jdbcType="VARCHAR" property="filePath" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    task_id, task_title, task_status, project_id, user_id, task_progress, task_start_time,
+    task_type, task_end_time, create_by, update_by, update_time, remark, total, project_name, user_name, file_id,file_name
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from manage_task
+    where task_id = #{taskId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from manage_task
+    where task_id = #{taskId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.yunan.assignment.domain.ManageTask">
+    <!--@mbg.generated-->
+    insert into manage_task (task_id, task_title, task_status, 
+      project_id, user_id, task_progress,
+      task_start_time, task_type, task_end_time, 
+      create_by, update_by, update_time, 
+      remark,total)
+    values (#{taskId,jdbcType=INTEGER}, #{taskTitle,jdbcType=VARCHAR}, #{taskStatus,jdbcType=INTEGER}, 
+      #{projectId,jdbcType=VARCHAR}, #{userId,jdbcType=INTEGER}, #{taskProgress,jdbcType=INTEGER},
+      #{taskStartTime,jdbcType=VARCHAR}, #{taskType,jdbcType=VARCHAR}, #{taskEndTime,jdbcType=VARCHAR}, 
+      #{createBy,jdbcType=VARCHAR}, #{updateBy,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR},#{total,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" useGeneratedKeys="true" parameterType="com.yunan.assignment.domain.ManageTask">
+    <!--@mbg.generated-->
+    insert into manage_task
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="taskTitle != null">
+        task_title,
+      </if>
+      <if test="taskStatus != null">
+        task_status,
+      </if>
+      <if test="projectId != null">
+        project_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="taskProgress != null">
+        task_progress,
+      </if>
+      <if test="taskStartTime != null">
+        task_start_time,
+      </if>
+      <if test="taskType != null">
+        task_type,
+      </if>
+      <if test="taskEndTime != null">
+        task_end_time,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="total != null">
+        total,
+      </if>
+      <if test="fileId != null">
+        file_id,
+      </if>
+      <if test="fileName != null">
+        fileName,
+      </if>
+      update_time,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        #{taskId,jdbcType=INTEGER},
+      </if>
+      <if test="taskTitle != null">
+        #{taskTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null">
+        #{taskStatus,jdbcType=INTEGER},
+      </if>
+      <if test="projectId != null">
+        #{projectId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="taskProgress != null">
+        #{taskProgress,jdbcType=INTEGER},
+      </if>
+      <if test="taskStartTime != null">
+        #{taskStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="taskType != null">
+        #{taskType,jdbcType=VARCHAR},
+      </if>
+      <if test="taskEndTime != null">
+        #{taskEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="total != null">
+        #{total,jdbcType=VARCHAR},
+      </if>
+      <if test="fileId != null">
+        #{fileId,jdbcType=INTEGER},
+      </if>
+      <if test="fileName != null">
+        #{fileName,jdbcType=VARCHAR}
+      </if>
+      sysdate()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yunan.assignment.domain.ManageTask">
+    <!--@mbg.generated-->
+    update manage_task
+    <set>
+      <if test="taskTitle != null">
+        task_title = #{taskTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null">
+        task_status = #{taskStatus,jdbcType=INTEGER},
+      </if>
+      <if test="projectId != null">
+        project_id = #{projectId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="taskProgress != null">
+        task_progress = #{taskProgress,jdbcType=INTEGER},
+      </if>
+      <if test="taskStartTime != null">
+        task_start_time = #{taskStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="taskType != null">
+        task_type = #{taskType,jdbcType=VARCHAR},
+      </if>
+      <if test="taskEndTime != null">
+        task_end_time = #{taskEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateBy != null">
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if><if test="total != null">
+        remark = #{total,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where task_id = #{taskId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yunan.assignment.domain.ManageTask">
+    <!--@mbg.generated-->
+    update manage_task
+<!--     set task_title = #{taskTitle,jdbcType=VARCHAR},-->
+<!--      task_status = #{taskStatus,jdbcType=INTEGER},-->
+<!--      project_id = #{projectId,jdbcType=VARCHAR},-->
+<!--      user_id = #{userId,jdbcType=INTEGER},-->
+<!--      task_progress = #{taskProgress,jdbcType=INTEGER},-->
+<!--      task_start_time = #{taskStartTime,jdbcType=VARCHAR},-->
+<!--      task_type = #{taskType,jdbcType=VARCHAR},-->
+<!--      task_end_time = #{taskEndTime,jdbcType=VARCHAR},-->
+<!--      create_by = #{createBy,jdbcType=VARCHAR},-->
+<!--      update_by = #{updateBy,jdbcType=VARCHAR},-->
+<!--      update_time = sysdate(),-->
+<!--      remark = #{remark,jdbcType=VARCHAR}-->
+    <set>
+      <if test="taskTitle != null and taskTitle != ''">task_title = #{taskTitle,jdbcType=VARCHAR},</if>
+      <if test="projectId != null and projectId != ''">project_id = #{projectId},</if>
+      <if test="userId != null and userId != ''">user_id = #{userId},</if>
+      <if test="taskProgress != null ">task_progress = #{taskProgress},</if>
+      <if test="taskType != null and taskType != ''">task_type = #{taskType},</if>
+      <if test="taskStartTime != null ">task_start_time = #{taskStartTime},</if>
+      <if test="taskEndTime !=null ">task_end_time= #{taskEndTime},</if>
+      <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+      <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+      <if test="fileId != null and fileId != ''">file_id = #{fileId},</if>
+      <if test="taskStatus != null and taskStatus != ''">task_status = #{taskStatus},</if>
+      update_time = sysdate(),
+      <if test="remark != null and remark != ''">remark = #{remark}</if>
+    </set>
+    where task_id = #{taskId,jdbcType=INTEGER}
+  </update>
+  <sql id="selectTask">
+<!--  select * from class a left join student_class b on a.class_id=b.cid left join student c on b.sid = c.id where a.class_id = #{class_id}-->
+      SELECT mt.*,mp.project_name,su.user_name,mf.file_name,mf.file_path FROM manage_task mt left join manage_project mp on mt.project_id=mp.project_id left join sys_user su on mt.user_id=su.user_id left join manage_file mf on mt.file_id=mf.file_id
+    </sql>
+  <select id="selectTaskList" resultMap="BaseResultMap">
+<!--        select * from manage_task-->
+      <include refid="selectTask"></include>
+      <where>
+        <if test="task.taskStatus != null and task.taskStatus != ''">
+          AND task_status = #{task.taskStatus}
+        </if>
+        <if test="task.taskType != null and task.taskType != ''">
+          AND task_type = #{task.taskType}
+        </if>
+        <if test="task.taskTitle != null and task.taskTitle != ''">
+          AND task_title like concat('%', #{task.taskTitle}, '%')
+        </if>
+        <if test="task.projectId != null and task.projectId != ''">
+          AND mt.project_id = #{task.projectId}
+        </if>
+      </where>
+    </select>
+  <select id="selectTaskByTaskId" resultMap="BaseResultMap">
+    select mk.*,mp.project_name from manage_task as mk,manage_project as mp where task_id=#{taskId} and mk.project_id=mp.project_id
+  </select>
+  <select id="selectProjectAndUserByTaskId" resultMap="BaseResultMap">
+    select project_id,user_id,task_status,task_progress from manage_task where task_id=#{tasKId}
+  </select>
+
+  <select id="selectMyselfTaskList" resultMap="BaseResultMap">
+    <include refid="selectTask"></include>
+    <where>
+      <if test="task.taskStatus != null and task.taskStatus != ''">
+        AND task_status = #{task.taskStatus}
+      </if>
+      <if test="task.taskType != null and task.taskType != ''">
+        AND task_type = #{task.taskType}
+      </if>
+      <if test="task.taskTitle != null and task.taskTitle != ''">
+        AND task_title like concat('%', #{task.taskTitle}, '%')
+      </if>
+      <if test="task.projectId != null and task.projectId != ''">
+        AND mt.project_id = #{task.projectId}
+      </if>
+        AND mt.user_id = #{userId}
+    </where>
+  </select>
+  <!--  <select id="selectAvgProgressByProjectId" resultType="java.lang.Long">-->
+<!--    select avg(task_progress) from manage_task group by project_id-->
+<!--  </select>-->
+
+
+  <sql id="selectIndexTask">
+        select
+        task_title,task_end_time,task_status,task_id
+         from manage_task t join sys_user u on t.user_id=u.user_id where u.user_id=#{userId}
+    </sql>
+
+  <select id="selectIndexTaskList" parameterType="ManageTask" resultMap="BaseResultMap" >
+    <include refid="selectIndexTask"></include>
+  </select>
+
+
+  <sql id="selectIndexTaskAll">
+          select u.user_name,
+        t.task_title,t.task_end_time,t.task_status,t.task_id
+         from manage_task t join sys_user u on t.user_id=u.user_id
+    </sql>
+
+  <select id="selectIndexTaskListAll" parameterType="ManageTask" resultMap="BaseResultMap" >
+    <include refid="selectIndexTaskAll"></include>
+  </select>
+
+
+  <sql id="taskListManage">
+    select
+        task_title,task_end_time,task_status,task_id from manage_task k where  k.user_id in
+    (select user_id from sys_user
+    where dept_id=(select dept_id from sys_user where user_id=#{userId}))
+    </sql>
+
+  <select id="taskListManage" parameterType="ManageTask" resultMap="BaseResultMap" >
+    <include refid="taskListManage"></include>
+  </select>
+
+
+
+  <sql id="selectTaskById">
+   SELECT mt.*,mp.project_name,su.user_name,mf.file_name,mf.file_path FROM manage_task mt
+    left join manage_project mp on mt.project_id=mp.project_id
+    left join sys_user su on mt.user_id=su.user_id left join manage_file mf on mt.file_id=mf.file_id
+    where task_id=#{taskId}
+    </sql>
+  <select id="selectTaskById" parameterType="ManageTask" resultMap="BaseResultMap" >
+    <include refid="selectTaskById"></include>
+  </select>
+  <select id="selectTaskByProjectId" resultMap="BaseResultMap">
+    select * from manage_task where project_id=#{projectId}
+  </select>
+  <select id="selectGrouperTaskList" resultMap="BaseResultMap">
+    <include refid="selectTask"></include>
+    <where>
+      <if test="task.taskStatus != null and task.taskStatus != ''">
+        AND task_status = #{task.taskStatus}
+      </if>
+      <if test="task.taskType != null and task.taskType != ''">
+        AND task_type = #{task.taskType}
+      </if>
+      <if test="task.taskTitle != null and task.taskTitle != ''">
+        AND task_title like concat('%', #{task.taskTitle}, '%')
+      </if>
+      <if test="task.projectId != null and task.projectId != ''">
+        AND mt.project_id = #{task.projectId}
+      </if>
+      AND mt.user_id in
+      (select user_id from sys_user
+      where dept_id=(select dept_id from sys_user where user_id=#{userId}))
+    </where>
+  </select>
+
+  <select id="selectProjectProcess" resultType="integer" parameterType="string">
+    select round(avg(task_progress),2) from manage_task where project_id = #{projectId}
+  </select>
+  <select id="selectProjectOfTaskByProjectId" resultMap="BaseResultMap">
+    select task_id,task_progress from manage_task where project_id=#{projectId}
+  </select>
+  <delete id="deleteTaskByUserId">
+    delete from manage_task where user_id=#{userId} and project_id=#{projectId}
+  </delete>
+  <update id="updateTaskByUserIdAndProjectId">
+    update manage_task set task_title=#{taskTitle},task_status=#{taskStatus},project_id=#{projectId},user_id=#{userId},task_progress=#{progress},task_start_time=#{taskStartTime},task_end_time=#{taskEndTime},task_type=#{taskType},create_by=#{createBy},update_by=#{updateBy},remark=#{remark} where user_id=#{userId} and project_id=#{projectId}
+  </update>
+  <select id="selectTaskbyUserIdAndProjectId" resultMap="BaseResultMap">
+    select * from manage_task where user_id=#{userId} and project_id=#{projectId}
+  </select>
+  <update id="updateTaskByUserTesterIdAndProjectId">
+    update manage_task set task_title=#{taskTitle},task_status=#{taskStatus},project_id=#{projectId},user_id=#{userId},task_progress=#{progress},task_start_time=#{taskStartTime},task_end_time=#{taskEndTime},task_type=#{taskType},create_by=#{createBy},update_by=#{updateBy},remark=#{remark} where user_id=#{testerId} and project_id=#{projectId}
+  </update>
+</mapper>

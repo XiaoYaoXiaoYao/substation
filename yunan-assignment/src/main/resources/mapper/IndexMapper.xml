@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunan.assignment.mapper.IndexMapper">
+
+    <resultMap type="Project" id="projectResultMap">
+        <id     property="projectId"      column="project_id"      />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectDescription"   column="project_description"   />
+        <result property="projectStartTime"    column="project_start_time"    />
+        <result property="projectEndTime"    column="project_end_time"    />
+        <result property="projectStage"      column="project_stage"      />
+        <result property="projectType"    column="project_type"    />
+        <result property="projectStatus"    column="project_status"    />
+        <result property="projectProcess"    column="project_process"    />
+        <result property="userId"    column="user_id"    />
+        <result property="projectPriority"    column="project_priority"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="projectRealEndTime"    column="project_real_end_time"    />
+        <result property="fileId" column="file_id" />
+    </resultMap>
+
+    <resultMap type="ManageTask" id="manageTaskResult">
+        <id column="task_id" jdbcType="INTEGER" property="taskId" />
+        <result column="task_title" jdbcType="VARCHAR" property="taskTitle" />
+        <result column="task_status" jdbcType="INTEGER" property="taskStatus" />
+        <result column="project_id" jdbcType="VARCHAR" property="projectId" />
+        <result column="user_id" jdbcType="INTEGER" property="userId" />
+        <result column="task_progress" jdbcType="INTEGER" property="taskProgress" />
+        <result column="task_start_time" jdbcType="VARCHAR" property="taskStartTime" />
+        <result column="task_type" jdbcType="VARCHAR" property="taskType" />
+        <result column="task_end_time" jdbcType="VARCHAR" property="taskEndTime" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+        <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+        <result column="total" jdbcType="VARCHAR" property="total" />
+    </resultMap>
+
+    <sql id="selectIndexProject">
+     select distinct project_name,project_end_time,project_status,project_process
+     from manage_project p
+     join manage_task t on p.project_id=t.project_id
+     join sys_user u on u.user_id=t.user_id
+     where u.user_id=#{userId}
+    </sql>
+    <select id="selectIndexProjectList" parameterType="Project" resultMap="projectResultMap" >
+      <include refid="selectIndexProject"></include>
+    </select>
+
+    <delete id="deleteProjectByids" parameterType="String">
+        delete from manage_project where project_id in
+        <foreach item="projectId" collection="array" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+
+
+    <sql id="selectIndexTask">
+        select (select count(*) from manage_task t where t.user_id=#{userId}) as total,
+        task_title,task_end_time,task_status
+         from manage_task t join sys_user u on t.user_id=u.user_id where u.user_id=#{userId}
+    </sql>
+
+    <select id="selectIndexTaskList" parameterType="ManageTask" resultMap="manageTaskResult" >
+        <include refid="selectIndexTask"></include>
+    </select>
+
+
+
+    <sql id="selectIndexProjectAll">
+    select project_name,project_end_time,project_status,project_process
+    from manage_project
+    </sql>
+    <select id="selectIndexProjectListAll" parameterType="Project" resultMap="projectResultMap" >
+        <include refid="selectIndexProjectAll"></include>
+    </select>
+
+
+
+    <sql id="selectIndexTaskAll">
+        select (select count(*) from manage_task  ) as total,
+        task_title,task_end_time,task_status
+         from manage_task
+    </sql>
+
+    <select id="selectIndexTaskListAll" parameterType="ManageTask" resultMap="manageTaskResult" >
+        <include refid="selectIndexTaskAll"></include>
+    </select>
+
+</mapper>

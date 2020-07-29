@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunan.assignment.mapper.ProjectMapper">
+
+    <resultMap type="Project" id="ProjectResult">
+        <result property="projectId"    column="project_id"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectDescription"    column="project_description"    />
+        <result property="projectStartTime"    column="project_start_time"    />
+        <result property="projectEndTime"    column="project_end_time"    />
+        <result property="projectStage"    column="project_stage"    />
+        <result property="projectType"    column="project_type"    />
+        <result property="projectStatus"    column="project_status"    />
+        <result property="projectProcess"    column="project_process"    />
+        <result property="userId"    column="user_id"    />
+        <result property="testerId"    column="tester_id"    />
+        <result property="projectPriority"    column="project_priority"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="projectRealEndTime"    column="project_real_end_time"    />
+        <result property="softwareVersion"    column="software_version"    />
+        <result property="svnPath"    column="svn_path"    />
+
+    </resultMap>
+
+    <sql id="selectProjectVo">
+        select distinct p.project_id, project_name,tester_id, project_description, project_start_time, project_end_time, project_stage, project_type, project_status, p.user_id, project_priority, p.create_by, p.update_by, p.update_time, p.remark, project_real_end_time,(select round(avg(task_progress),2) from manage_task mk group by mk.project_id having mk.project_id=p.project_id) as project_process,
+        s.software_version,s.svn_path
+        from manage_project p
+        left join manage_software s on p.project_id = s.project_id left join manage_task on manage_task.project_id=p.project_id
+<!--        select distinct p.project_id, project_name,project_end_time,project_status,-->
+<!--        ifnull((select avg(task_progress) from manage_task mk group by mk.project_id-->
+<!--        having mk.project_id=p.project_id),0 )as project_process-->
+<!--        from manage_project p-->
+<!--        join manage_task t on p.project_id=t.project_id-->
+<!--        join sys_user u on u.user_id=t.user_id-->
+<!--        where u.user_id=#{userId}    -->
+</sql>
+    <sql id="selectProjectVo1">
+        select distinct p.project_id, project_name,tester_id, project_description, project_start_time, project_end_time, project_stage, project_type, project_status, p.user_id, project_priority, p.create_by, p.update_by, p.update_time, p.remark, project_real_end_time,(select round(avg(task_progress),2) from manage_task mk group by mk.project_id having mk.project_id=p.project_id) as project_process,
+        s.software_version,s.svn_path
+        from manage_project p
+        left join manage_software s on p.project_id = s.project_id left join manage_task on manage_task.project_id=p.project_id join sys_user u on u.user_id=manage_task.user_id
+</sql>
+
+    <select id="selectProjectList" parameterType="Project" resultMap="ProjectResult">
+        <include refid="selectProjectVo"/>
+        <where>
+            <if test="projectId != null  and projectId != ''"> and project_id = #{projectId}</if>
+            <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="projectStartTime != null  and projectStartTime != ''"> and project_start_time like concat('%', #{projectStartTime}, '%') </if>
+            <if test="projectEndTime != null  and projectEndTime != ''"> and project_end_time like concat('%', #{projectEndTime}, '%') </if>
+            <if test="projectStage != null "> and project_stage = #{projectStage}</if>
+            <if test="projectType != null "> and project_type = #{projectType}</if>
+            <if test="projectStatus != null "> and project_status = #{projectStatus}</if>
+            <if test="projectProcess != null "> and project_process = #{projectProcess}</if>
+            <if test="userId != null and userId != ''"> and p.user_id = #{userId}</if>
+            <if test="projectRealEndTime != null  and projectRealEndTime != ''"> and project_real_end_time = #{projectRealEndTime}</if>
+        </where>
+        ORDER BY project_priority asc
+    </select>
+
+    <select id="selectProjectById" parameterType="String" resultMap="ProjectResult">
+        <include refid="selectProjectVo"/>
+        where p.project_id = #{projectId}
+    </select>
+
+    <insert id="insertProject" parameterType="Project">
+        insert into manage_project
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null and projectId != ''">project_id,</if>
+            <if test="projectName != null and projectName != ''">project_name,</if>
+            <if test="projectDescription != null and projectDescription != ''">project_description,</if>
+            <if test="projectEndTime != null and projectEndTime != ''">project_end_time,</if>
+            <if test="projectStage != null">project_stage,</if>
+            <if test="projectType != null">project_type,</if>
+            <if test="projectStatus != null">project_status,</if>
+            <if test="projectProcess != null">project_process,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="testerId != null">tester_id,</if>
+            <if test="projectPriority != null">project_priority,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="remark != null">remark,</if>
+            <if test="projectRealEndTime != null">project_real_end_time,</if>
+            <if test="projectStartTime != null">project_start_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null and projectId != ''">#{projectId},</if>
+            <if test="projectName != null and projectName != ''">#{projectName},</if>
+            <if test="projectDescription != null and projectDescription != ''">#{projectDescription},</if>
+            <if test="projectEndTime != null and projectEndTime != ''">#{projectEndTime},</if>
+            <if test="projectStage != null">#{projectStage},</if>
+            <if test="projectType != null">#{projectType},</if>
+            <if test="projectStatus != null">#{projectStatus},</if>
+            <if test="projectProcess != null">#{projectProcess},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="testerId != null">#{testerId},</if>
+            <if test="projectPriority != null">#{projectPriority},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="projectRealEndTime != null">#{projectRealEndTime},</if>
+            <if test="projectStartTime != null">#{projectStartTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateProject" parameterType="Project">
+        update manage_project
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectName != null and projectName != ''">project_name = #{projectName},</if>
+            <if test="projectDescription != null and projectDescription != ''">project_description = #{projectDescription},</if>
+            <if test="projectStartTime != null and projectStartTime != ''">project_start_time = #{projectStartTime},</if>
+            <if test="projectEndTime != null and projectEndTime != ''">project_end_time = #{projectEndTime},</if>
+            <if test="projectStage != null">project_stage = #{projectStage},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="projectType != null">project_type = #{projectType},</if>
+            <if test="projectStatus != null">project_status = #{projectStatus},</if>
+            <if test="projectProcess != null">project_process = #{projectProcess},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="testerId != null">tester_id = #{testerId},</if>
+            <if test="projectPriority != null">project_priority = #{projectPriority},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="projectRealEndTime != null">project_real_end_time = #{projectRealEndTime},</if>
+            update_time = sysdate()
+        </trim>
+        where project_id = #{projectId}
+    </update>
+
+    <delete id="deleteProjectById" parameterType="String">
+        delete from manage_project where project_id = #{projectId}
+    </delete>
+
+    <delete id="deleteProjectByIds" parameterType="String">
+        delete from manage_project where project_id in
+        <foreach item="projectId" collection="array" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+
+    <select id="checkProjectIdUnique" parameterType="String" resultMap="ProjectResult">
+        <include refid="selectProjectVo"/>
+        where p.project_id=#{projectId}
+    </select>
+    <select id="selectProjectNameById" resultType="com.yunan.assignment.domain.Project">
+        select project_id,project_name from manage_project where project_id=#{projectId}
+    </select>
+
+
+
+    <sql id="selectIndexProject">
+     select distinct p.project_id, project_name,project_end_time,project_status,
+     ifnull((select avg(task_progress) from manage_task mk group by mk.project_id
+     having mk.project_id=p.project_id),0 )as project_process
+     from manage_project p
+     join manage_task t on p.project_id=t.project_id
+     join sys_user u on u.user_id=t.user_id
+     where u.user_id=#{userId}
+    </sql>
+    <select id="selectIndexProjectList" parameterType="Project" resultMap="ProjectResult" >
+        <include refid="selectIndexProject"></include>
+    </select>
+
+
+    <sql id="selectIndexExportProject">
+        select distinct p.project_id, project_name,project_end_time,tester_id,project_status,project_description, project_start_time,
+        project_stage, project_type, project_status, p.user_id, project_priority,
+        p.create_by, p.update_by, p.update_time, p.remark,
+        project_real_end_time,
+        ifnull((select avg(task_progress) from manage_task mk group by mk.project_id
+        having mk.project_id=p.project_id),0 )as project_process,
+        s.software_version,s.svn_path
+        from manage_project p
+        left join manage_software s on p.project_id = s.project_id
+        join manage_task t on p.project_id=t.project_id
+        join sys_user u on u.user_id=t.user_id
+        where u.user_id=#{userId}
+    </sql>
+    <select id="selectIndexExportProject" parameterType="Project" resultMap="ProjectResult" >
+        <include refid="selectIndexExportProject"></include>
+    </select>
+
+
+    <sql id="selectIndexProjectAll">
+     select p.project_id,project_name,project_end_time,project_status,
+     ifnull((select avg(task_progress) from manage_task mk group by mk.project_id
+     having mk.project_id=p.project_id),0)as project_process
+     from manage_project p
+    </sql>
+    <select id="selectIndexProjectListAll" parameterType="Project" resultMap="ProjectResult" >
+        <include refid="selectIndexProjectAll"></include>
+    </select>
+    <select id="selectMyProjectById" resultType="com.yunan.assignment.domain.Project">
+        select project_id,project_name from manage_project where user_id=#{userId}
+    </select>
+
+
+
+    <sql id="projectListManage">
+     select p.project_id, project_name,project_end_time,project_status,
+     ifnull((select avg(task_progress) from manage_task mk group by mk.project_id
+     having mk.project_id=p.project_id),0)as project_process
+     from manage_project p  join sys_user u on u.user_id=p.user_id where u.user_id=#{userId}
+    </sql>
+    <select id="projectListManage" parameterType="Project" resultMap="ProjectResult" >
+        <include refid="projectListManage"></include>
+    </select>
+
+
+    <sql id="projectListTest">
+     select p.project_id, project_name,project_end_time,project_status,tester_id,
+     ifnull((select avg(task_progress) from manage_task mk group by mk.project_id
+     having mk.project_id=p.project_id),0)as project_process
+     from manage_project p where p.tester_id like concat('%',#{userId},'%')
+    </sql>
+    <select id="projectListTest" parameterType="Project" resultMap="ProjectResult" >
+        <include refid="projectListTest"></include>
+    </select>
+    <select id="selectMyProjectList" parameterType="Project" resultMap="ProjectResult">
+        <include refid="selectProjectVo1"/>
+        <where>
+            <if test="project.projectId != null  and project.projectId != ''"> and project_id = #{project.projectId}</if>
+            <if test="project.projectName != null  and project.projectName != ''"> and project_name like concat('%', #{project.projectName}, '%')</if>
+            <if test="project.projectStartTime != null  and project.projectStartTime != ''"> and project_start_time like concat('%', #{project.projectStartTime}, '%') </if>
+            <if test="project.projectEndTime != null  and project.projectEndTime != ''"> and project_end_time like concat('%', #{project.projectEndTime}, '%') </if>
+            <if test="project.projectStage != null "> and project_stage = #{project.projectStage}</if>
+            <if test="project.projectType != null "> and project_type = #{project.projectType}</if>
+            <if test="project.projectStatus != null "> and project_status = #{project.projectStatus}</if>
+            <if test="project.projectProcess != null "> and project_process = #{project.projectProcess}</if>
+            <if test="project.projectRealEndTime != null  and project.projectRealEndTime != ''"> and project_real_end_time = #{project.projectRealEndTime}</if>
+            and u.user_id=#{userId}
+        </where>
+    </select>
+
+</mapper>

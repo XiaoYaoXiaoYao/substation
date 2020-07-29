@@ -1,0 +1,8 @@
+# Project exclude paths
+/yunan-admin/target/
+/yunan-assignment/target/
+/yunan-common/target/
+/yunan-framework/target/
+/yunan-generator/target/
+/yunan-quartz/target/
+/yunan-system/target/

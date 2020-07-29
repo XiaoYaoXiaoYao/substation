@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('上传文件')" />
+    <th:block th:include="include :: layout-latest-css" />
+    <th:block th:include="include :: ztree-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <input id="defectId" name="defectId" type="hidden" th:field="*{defectId}">
+    <form class="form-horizontal m" id="form-defect-upload" th:object="${defect}" method="post" enctype="multipart/form-data" >
+    <!-- 文件上传的form，method必须是post， enctype需要指定二进制方式提交form表单中的数据 -->
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">项目编号：</label>
+            <div class="col-sm-8">
+                <input name="projectId" th:field="*{projectId}" readonly="readonly">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">项目名称：</label>
+            <div class="col-sm-8">
+                <input name="projectName" th:field="*{projectName}" readonly="readonly">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">文件名：</label>
+            <div class="col-sm-8">
+                <input name="fileName" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">文件类型：</label>
+            <div class="col-sm-8">
+                <div class="radio-box" th:each="dict : ${@dict.getType('sys_file_type')}">
+                    <input type="radio" th:id="${dict.dictCode}" name="fileType" th:value="${dict.dictValue}" th:checked="${dict.default}">
+                    <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">文件级别：</label>
+            <div class="col-sm-8">
+                <div class="radio-box" th:each="dict : ${@dict.getType('sys_file_level')}">
+                    <input type="radio" th:id="${dict.dictCode}" name="fileLevel" th:value="${dict.dictValue}" th:checked="${dict.default}">
+                    <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">备注：</label>
+            <div class="col-sm-8">
+                <input name="remark" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <!-- 必填 -->
+            <label class="col-sm-3 control-label is-required">文件路径：</label>
+            <div class="col-sm-8">
+                <input name="filePath" id="filePath" class="form-control" type="file" required>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: layout-latest-js" />
+<th:block th:include="include :: ztree-js" />
+<script type="text/javascript">
+    var prefix = ctx + "assignment/defect"
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            const formData = new FormData();
+            //debugger
+            //alert($("#svnPath").val());
+            //alert($('#filePath')[0].files[0]);
+            const file = $('#filePath')[0].files[0];
+            const fileObj = $('#form-defect-upload').serialize() + "";
+
+            formData.append('fileObj',fileObj);
+            formData.append('file',file );
+            $.ajax({
+                url: prefix + "/upload",
+                type: 'post',
+                dataType: "json",
+                cache: false,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+
+                    //alert(result.data.fileId);
+                    var fileId = result.data.fileId;
+                    var  defectId=[[${defect.defectId}]];
+
+                    var jsonObj={
+                        "defectId": defectId,
+                        "fileId": fileId
+                    };
+                    var jsonStr = JSON.stringify(jsonObj);
+                    //alert(jsonStr);
+                   // alert(defectId);
+                    $.ajax({
+                        url: prefix + "/editByCondition",
+                        type: 'post',
+                        dataType: "json",
+                        cache: false,
+                        data: jsonStr,
+                        contentType: "application/json;charset=UTF-8",
+                        success: function(result) {
+                            $.operate.successCallback(result);
+                        }
+                    });
+                    $.operate.successCallback(result);
+                }
+            });
+        }
+    }
+</script>
+</body>
+</html>

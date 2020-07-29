@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改bug')"/>
+    <th:block th:include="include :: datetimepicker-css" />
+    <th:block th:include="include :: datetimepicker-js" />
+</head>
+<body class="white-bg">
+
+<div class="main-content">
+    <form class="form-horizontal m" id="form-job-edit" th:object="${defect}">
+        <h4 class="form-header h4">基本信息</h4>
+        <div class="row">
+            <input id="defectId" name="defectId" type="hidden" th:field="*{defectId}">
+            <input type="hidden" name="updateBy" th:value="${@permission.getPrincipalProperty('userName')}">
+            <input type="hidden" name="createBydfasjf"    id="createBydfasjf" th:field="*{createBy}">
+            <input id="roleFlag" type="hidden" th:value="${roleKey}">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group" >
+                        <label class="col-sm-4 control-label ">BUG名称：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" name="defectTitle" id="defectTitle"
+                                   th:field="*{defectTitle}" required maxlength="64">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label ">BUG截止日期：</label>
+                        <div class="col-xs-8" >
+                            <input class="form-control protime-input-bug " type="text" name="defectEndTime" id="defectEndTime"
+                                   th:field="*{defectEndTime}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group" >
+                        <label class="col-sm-4 control-label ">所属项目：</label>
+                        <div class="col-sm-8">
+                            <select name="projectId"  id="project" class="form-control m-b"
+                                    th:with="associatedProject=${@defect.associatedProjectList()}"  required>
+                                <option value="">请选择</option>
+                                <option th:each="defect : ${associatedProject}" th:text="${defect.projectName}"
+                                        th:value="${defect.projectId}" th:field="*{projectId}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group"   >
+                        <label class="col-xs-2 control-label ">关联用户：</label>
+                        <div class="col-xs-8">
+                            <select name="userId"  id="user" class="form-control m-b"
+                                    th:with="associatedCoder=${@defect.selectAssociatedCoderList()}"  required>
+                                <option value="">请选择项目下的人员</option>
+                                <option th:value="${defect.userId}"   th:text="${defect.userName}" th:field="*{userId}"></option>
+                            </select>
+                            <span class="help-block m-b-none"><i class="fa fa-info-circle"></i>修改用户,需要重新选择项目</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group ">
+                        <label class="col-sm-4 control-label ">BUG类型：</label>
+                        <div class="col-sm-8">
+                            <select name="defectType"  id="defectType" class="form-control m-b"
+                                    th:with="type=${@dict.getType('defect_type')}"  required>
+                                <option value="">请选择</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}" th:field="*{defectType}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6" >
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label is-required">解决状态：</label>
+                        <div class="col-xs-8"  th:if="${@defect.getPrincipalRoleKey() eq 'tester'  }">
+<!--                            <div class="radio-box" th:each="dict : ${@dict.getType('defect_status')}">-->
+<!--                                <input type="radio" th:id="${dict.dictCode}" name="status"   id="status" th:value="${dict.dictValue}"-->
+<!--                                       th:field="*{defectStatus}"  required>-->
+<!--                                <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>-->
+<!--                            </div>-->
+                            <div class="radio-box" required  >
+                                <input type="radio" id="152" name="defectStatus" value="3" checked="checked"  th:field="*{defectStatus}">
+                                <label for="152" >已关闭</label>
+                            </div>
+                            <div class="radio-box" required>
+                                <input type="radio" id="131" name="defectStatus" value="1" checked="checked"  th:field="*{defectStatus}">
+                                <label for="131" >已解决</label>
+                            </div>
+                            <div class="radio-box" required>
+                                <input type="radio" id="129" name="defectStatus" value="0" checked="checked"   th:field="*{defectStatus}">
+                                <label for="129">待处理</label>
+                            </div>
+                        </div>
+
+
+                        <div class="col-xs-8"  th:if="${@defect.getPrincipalRoleKey() eq 'coder'  or  @defect.getPrincipalRoleKey() eq 'grouper' }">
+                            <!--                            <div class="radio-box" th:each="dict : ${@dict.getType('defect_status')}">-->
+                            <!--                                <input type="radio" th:id="${dict.dictCode}" name="status"   id="status" th:value="${dict.dictValue}"-->
+                            <!--                                       th:field="*{defectStatus}"  required>-->
+                            <!--                                <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>-->
+                            <!--                            </div>-->
+                            <div class="radio-box" required  >
+                                <input type="radio" id="152_coder" name="defectStatus" value="3" checked="checked"  disabled="disabled"  th:field="*{defectStatus}">
+                                <label for="152_coder" >已关闭</label>
+                            </div>
+                            <div class="radio-box" required>
+                                <input type="radio" id="131_coder" name="defectStatus" value="1" checked="checked"  th:field="*{defectStatus}" >
+                                <label for="131_coder" >已解决</label>
+                            </div>
+                            <div class="radio-box" required>
+                                <input type="radio" id="129_coder" name="defectStatus" value="0" checked="checked"   th:field="*{defectStatus}">
+                                <label for="129_coder">待处理</label>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-8"  th:if="${@defect.getPrincipalRoleKey() eq 'executor'  }">
+                            <!--                            <div class="radio-box" th:each="dict : ${@dict.getType('defect_status')}">-->
+                            <!--                                <input type="radio" th:id="${dict.dictCode}" name="status"   id="status" th:value="${dict.dictValue}"-->
+                            <!--                                       th:field="*{defectStatus}"  required>-->
+                            <!--                                <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>-->
+                            <!--                            </div>-->
+                            <div class="radio-box" required  >
+                                <input type="radio" id="152_executor" name="defectStatus" value="3" checked="checked"  disabled="disabled"  th:field="*{defectStatus}">
+                                <label for="152_coder" >已关闭</label>
+                            </div>
+                            <div class="radio-box" required>
+                                <input type="radio" id="131_executor" name="defectStatus" value="1" checked="checked"  disabled="disabled" th:field="*{defectStatus}">
+                                <label for="131_coder" >已解决</label>
+                            </div>
+                            <div class="radio-box" required>
+                                <input type="radio" id="129_executor" name="defectStatus" value="0" checked="checked"   disabled="disabled" th:field="*{defectStatus}">
+                                <label for="129_coder">待处理</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label ">严重程度：</label>
+                        <div class="col-sm-8">
+                            <select name="defectSeverity"  id="defectSeverity" class="form-control m-b"
+                                    th:with="type=${@dict.getType('defect_severity')}"  required>
+                                <option value="">请选择</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}" th:field="*{defectSeverity}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label ">优先级：</label>
+                        <div class="col-xs-8">
+                            <select name="defectPriority" class="form-control m-b"
+                                    th:with="type=${@dict.getType('defect_priority')}" id="defectPriority">
+                                <option value="">请选择</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}" th:field="*{defectPriority}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label ">重现步骤：</label>
+                        <div class="col-sm-8">
+                            <textarea id="defectReproSteps" name="defectReproSteps" class="form-control"
+                                      th:field="*{defectReproSteps}"  required  maxlength="64"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label">备注：</label>
+                        <div class="col-xs-8">
+                            <textarea name="remark"  id="remark" maxlength="255" class="form-control" rows="3" th:field="*{remark}" ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">附件：</label>
+                    <div class="col-sm-8" >
+                        <a class="btn btn-primary btn-xs"   href="javascript:void(0)" onclick="uploadFile();" style="display: block">
+                            <i class="fa fa-upload"></i>上传附件
+                        </a>
+                        <input class="form-control" type="hidden" name="fileId" id="fileId"  readonly  value=""  th:field="*{fileId}">
+                        <input class="form-control" type="text" name="fileId_hidden" id="fileId_hidden"  readonly  value=""  style="display: block" th:field="*{fileName}" >
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</form>
+
+
+
+    <h4 class="form-header h4">上传附件</h4>
+    <form class="form-horizontal m " id="form-defect-upload"  method="post" enctype="multipart/form-data"  style="display: none" data-id="file_upload" >
+        <!-- 文件上传的form，method必须是post， enctype需要指定二进制方式提交form表单中的数据 -->
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">项目编号：</label>
+            <div class="col-sm-8">
+                <input name="projectId"  id="projectId"  readonly="readonly"  value=""   required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">项目名称：</label>
+            <div class="col-sm-8">
+                <input name="projectName"   id="projectName"  value=""   readonly="readonly"  required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">文件名：</label>
+            <div class="col-sm-8">
+                <input name="fileName"   id="fileName" class="form-control"   placeholder="请填写附件名" type="text" required  maxlength="64">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">文件类型：</label>
+            <div class="col-sm-8">
+<!--                <div class="radio-box" >-->
+<!--                    <input type="radio" id="145" name="fileType" value="1"   >-->
+<!--                    <label for="145">需求</label>-->
+<!--                </div>-->
+<!--                <div class="radio-box" >-->
+<!--                    <input type="radio" id="146" name="fileType" value="2" >-->
+<!--                    <label for="146">设计</label>-->
+<!--                </div>-->
+<!--                <div class="radio-box" >-->
+<!--                    <input type="radio" id="147" name="fileType" value="3">-->
+<!--                    <label for="147">开发</label>-->
+<!--                </div>-->
+                <div class="radio-box" >
+                    <input type="radio" id="148" name="fileType" value="4" checked="checked"   required >
+                    <label for="148">测试</label>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">文件级别：</label>
+
+            <div class="col-sm-8">
+                <div class="radio-box" >
+                    <input type="radio" id="149" name="fileLevel" value="1" checked="checked"     required  >
+                    <label for="149">项目级别</label>
+                </div>
+
+                <div class="radio-box" >
+                    <input type="radio" id="150" name="fileLevel" value="2"   >
+                    <label for="150">任务级别</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">备注：</label>
+            <div class="col-sm-8">
+                <input name="remark"   id="file_remark" class="form-control" type="text" maxlength="255">
+            </div>
+        </div>
+        <div class="form-group">
+            <!-- 必填 -->
+            <label class="col-sm-3 control-label is-required">文件路径：</label>
+            <div class="col-sm-8">
+                <input name="filePath" id="filePath" class="form-control" type="file" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-offset-5 col-sm-10">
+                <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler_upload()"><i class="fa fa-check"></i>上传</button>&nbsp;
+                <button type="button" class="btn btn-sm btn-danger" onclick="closeItem_upload()"><i class="fa fa-reply-all"></i>关 闭 </button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="col-sm-offset-5 col-sm-10">
+        <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler_edit_executor()"><i class="fa fa-check"></i>保 存
+        </button>&nbsp;
+        <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭
+        </button>
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<script type="text/javascript">
+    var prefix = ctx + "assignment/defect";
+    /**
+     *在修改之前判断用户角色
+     * @type {undefined|*|jQuery.$element|jQuery}
+     */
+    var flag = $("#roleFlag").val();
+    if (flag=='coder'){
+        $("input[name='defectTitle']").attr({ readonly: 'true' });
+        $("input[name='defectEndTime']").attr({ disabled: 'true' });
+        $("#project").attr({ disabled: 'true' });
+        $("#user").attr({ disabled: 'true' });
+        $("#defectType").attr({ disabled: 'true' });
+        $("#user").attr({ disabled: 'true' });
+        $("#post").attr({ disabled: 'true' });
+        $("#post").attr({ disabled: 'true' });
+        $("#otherProject").attr({ disabled: 'true' });
+    }
+
+    //bug列表的上传
+    function uploadFile() {
+        console.log("下载")
+        //首先进行判断新增的时候的所属项目已经选择了
+        //拿到选取的项目的值
+        var  projectId=$("#project option:selected").val();
+        //	alert(projectId);
+        if (projectId == '') {
+            //说明还没有选择所属的项目
+            $.modal.alert("请先选择所属的项目");
+
+        }else {
+            //所属的项目已经选择了,显示上传附件的form表单
+            //进行数据的清空
+            document.getElementById('projectId').value='';
+            document.getElementById('projectName').value='';
+            document.getElementById('fileName').value='';
+            document.getElementById('filePath').value='';
+            // $("#projectId").value='';
+            // $("#projectName").value='';
+            // $("#fileName").value='';
+            // $("#filePath").value='';
+            document.getElementById('form-defect-upload').style.display='';
+            //首先根据所选的项目回显项目编号和项目名称
+            var  projectId=$("#project option:selected").val();
+            var  projectName=$("#project option:selected").text();
+            //alert(projectId);
+            //alert(projectName);
+
+            document.getElementById('projectId').value=projectId;
+            document.getElementById('projectName').value=projectName;
+            $.modal.alertSuccess("请使用压缩包上传附件!!!");
+
+        }
+
+
+    };
+
+    $("#project").click(function(){
+        //拿到选取的项目的值
+        var  projectId=$("#project option:selected").val();
+        //$.modal.alertSuccess("请重新选择关联的用户");
+
+        //如果选择了[请选择]下拉值,提示先选择项目
+        if (projectId=='') {
+            $("#user").empty();
+            $("#user").append("<option value=\"\">请选择项目下的人员</option>")
+            return
+        }
+        var  projectName=$("#project option:selected").text();
+        //alert(projectId);
+        // 根据projectId进行关联的用户的回显
+        //TODO 这边可能还要加判断
+        // $.modal.alertSuccess("项目改变,请重新上传附件!!!")
+        // document.getElementById('fileId').value='';
+        // document.getElementById('fileId_hidden').value='';
+
+        //点击项目之后的上传附件的项目id和项目名字的回显
+        document.getElementById('projectId').value=projectId;
+        document.getElementById('projectName').value=projectName;
+
+
+        let s = JSON.stringify({"projectId":projectId});
+
+        $.ajax({
+            url: prefix + "/showAssociatedUser/projectId",
+            type: 'post',
+            dataType: "json",
+            cache: false,
+            data: s,
+            contentType: "application/json;charset=UTF-8",
+            success: function(result) {
+                console.log(result);
+
+                //如果选择了[请选择]下拉值,提示先选择项目
+                //debugger
+                //alert(projectId);
+                //清空 Select:
+                $("#user").empty();
+                $("#user").append("<option value=\"\">请选择项目下的人员</option>")
+                $.each(result.data,function(index,item){
+                    //console.log(result.data)
+                    $('#user').append(new Option(item.userName,item.userId));
+
+                });
+                // $.operate.successCallback(result);
+            }
+        });
+
+    });
+
+
+
+
+    $("#form-job-edit").validate({
+        onkeyup: false,
+        rules: {
+            cronExpression: {
+                required: true,
+                remote: {
+                    url: prefix + "/checkCronExpressionIsValid",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        "cronExpression": function () {
+
+                            return $.common.trim($("#cronExpression").val());
+                        }
+                    },
+                    dataFilter: function (data, type) {
+                        return data;
+                    }
+                }
+            },
+        },
+        messages: {
+            "cronExpression": {
+                remote: "表达式不正确"
+            }
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/edit", $('#form-job-edit').serialize());
+        }
+    }
+
+    function closeItem_upload() {
+
+        document.getElementById('form-defect-upload').style.display='none';
+
+    }
+
+    function submitHandler_edit_executor() {
+
+        if ($.validate.form()) {
+
+            //首先拿到当前想要编辑的这一行的数据,看这个创建的人是不是实施人员
+            //首先拿到当前想要编辑的这一行的数据,看这个创建的人是不是实施人员
+
+
+            //alert(id);
+            $.ajax({
+                url: prefix + "/ifTester",
+                type: 'post',
+                dataType: "json",
+                cache: false,
+                data:{},
+                contentType: "application/json;charset=UTF-8",
+                success: function(result) {
+                    //是测试的编辑
+                    //debugger
+                    //alert("msg"+result.msg);
+                    //alert("data"+result.data);
+                    if (result.data=='1'||result.msg=='操作成功') {
+                        //这边进入的是测试人员
+                        //如果是实施人员,而且关联的用户已经变成了开发人员,
+                        // 就要在测试人员中同步新增一条测试新增给这个开发人员的一条bug
+
+                        let userId = $("#user option:selected").val();
+                        //alert(userId);
+
+                        let createByExecutor = $("#createBydfasjf").val();
+
+                        $.ajax({
+                            url: prefix + "/ifCreateByExecutor/" + createByExecutor,
+                            type: 'post',
+                            dataType: "json",
+                            cache: false,
+                            data: {},
+                            success: function (result) {
+                                //如果结果是1的话那么当前的是实施人员创建的bug
+                                //在判断所选想要提交的关联用户的userId,
+                                // 判断是不是开发人员,是那么就要在更新的同时,加入一条测试创建的bug
+                                // debugger
+                                if (result.code == 0 && result.msg == "1") {
+                                    //进行插入一条测试创建的bug
+                                    //alert(result.msg);
+
+                                    //拿到测试新增bug的数据
+                                    let defectTitle_insert = $("#defectTitle").val();
+                                    //alert(defectTitle_insert+"1");
+                                    let defectEndTime_insert = $("#defectEndTime").val();
+                                    //alert(defectEndTime_insert+"2");
+
+                                    var projectId_insert = $("#project option:selected").val();
+                                    //alert(projectId_insert+"3");
+
+                                    var userId_insert = $("#user option:selected").val();
+                                    //alert(userId_insert+"4");
+
+                                    var defectType_insert = $("#defectType option:selected").val();
+                                    //alert(defectType_insert+"5");
+
+                                    // var defectStatus__insert =$('input[name="status"]:checked').val();
+                                    // alert(defectStatus__insert+"6");
+
+                                    var defectStatus__insert=$("input[type='radio']:checked").val();
+                                    //alert(defectStatus__insert+"6");
+
+
+                                    var defectSeverity_insert = $("#defectSeverity option:selected").val();
+                                    //alert(defectSeverity_insert+"7");
+
+                                    var defectPriority_insert = $("#defectPriority option:selected").val();
+                                    //alert(defectPriority_insert+"8");
+
+                                    let defectReproSteps_insert = $("#defectReproSteps").val();
+                                    //alert(defectReproSteps_insert+"9");
+
+                                    let remark_insert = $("#remark").val();
+                                    //alert(remark_insert+"10");
+
+                                    let fileId_insert = $("#fileId").val();
+                                    //alert(fileId_insert+"11");
+
+
+                                    formData = {
+                                        "defectTitle": defectTitle_insert,
+                                        "defectEndTime": defectEndTime_insert,
+                                        "projectId": projectId_insert,
+                                        "userId": userId_insert,
+                                        "defectType": defectType_insert,
+                                        "status": defectStatus__insert,
+                                        "defectSeverity": defectSeverity_insert,
+                                        "defectReproSteps": defectReproSteps_insert,
+                                        "defectPriority": defectPriority_insert,
+                                        "remark": remark_insert,
+                                        "fileId": fileId_insert,
+                                        "createBy": ""
+                                    };
+
+                                    let form_data_insert = JSON.stringify(formData);
+                                    //alert(form_data_insert);
+                                    $.ajax({
+                                        url: prefix + "/addSaveByExecutor",
+                                        type: 'post',
+                                        dataType: "json",
+                                        cache: false,
+                                        data: form_data_insert,
+                                        processData: false,
+                                        contentType: "application/json;charset=UTF-8",
+                                        success: function (result) {
+                                            // debugger
+
+                                            //alert("xinzeng")
+                                            $.operate.save(prefix + "/edit", $('#form-job-edit').serialize());
+
+
+                                        }
+                                    });
+
+                                }else{
+                                    $.operate.save(prefix + "/edit", $('#form-job-edit').serialize());
+                                }
+
+                            }
+
+                        });
+
+                    }else{
+                        $.operate.save(prefix + "/edit", $('#form-job-edit').serialize());
+                    }
+
+                }
+            });
+
+
+        }
+
+
+
+
+
+    }
+
+
+
+    function submitHandler_upload() {
+
+
+
+        if ($.validate.form("form-defect-upload")) {
+            const formData = new FormData();
+            //debugger
+            //alert($("#svnPath").val());
+            //alert($('#filePath')[0].files[0]);
+            const file = $('#filePath')[0].files[0];
+            const fileObj = $('#form-defect-upload').serialize() + "";
+
+            formData.append('fileObj',fileObj);
+            formData.append('file',file );
+            $.ajax({
+                url: prefix + "/upload",
+                type: 'post',
+                dataType: "json",
+                cache: false,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+                    let projectName_upload = result.data.fileId;
+                    let projectName_upload_fileName = result.data.fileName;
+                    //alert(projectName)
+                    //alert(projectName_upload_fileName)
+                    document.getElementById('fileId').value=projectName_upload;
+                    document.getElementById('fileId_hidden').value=projectName_upload_fileName;
+                    //alert(document.getElementById('fileId').value)
+
+                    //document.getElementById('fileId').text=projectName_upload_fileName;
+                    document.getElementById('form-defect-upload').style.display='none';
+                    //$.modal.alert("附件上传成功!!!" +projectName_upload)
+
+
+                }
+            });
+        }
+        // if ($.validate.form("form-defect-upload")) {
+        // 	$.operate.save(prefix + "/upload", $('#form-defect-upload').serialize());
+        //
+        // }
+    }
+
+</script>
+</body>
+</html>

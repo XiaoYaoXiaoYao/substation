@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html  lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>首页</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link th:href="@{favicon.ico}" rel="stylesheet"/>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/jquery.contextMenu.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/animate.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link th:href="@{/css/skins.css}" rel="stylesheet"/>
+    <link th:href="@{/yunan/css/ry-ui.css?v=4.2.0}" rel="stylesheet"/>
+</head>
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow: hidden">
+<div class="col-sm-8 select-table " >
+    <table id="bootstrap-table"><h1 style="font-weight: bold">我的项目</h1></table>
+</div>
+
+<div class="col-sm-8 select-table table-striped">
+    <table id="bootstrap-table1" ><h1 style="font-weight: bold">我的任务</h1></table>
+</div>
+<!-- 全局js -->
+<script th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+<script th:src="@{/js/jquery.contextMenu.min.js}"></script>
+<script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+<script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+<script th:src="@{/yunan/js/ry-ui.js?v=4.2.0}"></script>
+<script th:src="@{/yunan/js/common.js?v=4.2.0}"></script>
+<script th:src="@{/yunan/index.js}"></script>
+<script th:src="@{/ajax/libs/fullscreen/jquery.fullscreen.js}"></script>
+<style>
+    .btn-group, .btn-group-vertical{
+        display: none;
+    }
+
+    .pagination {
+        margin: 10px;
+    }
+
+</style>
+
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var prefix = ctx + "index";
+    var datas = [[${@dict.getType('sys_project_status')}]];
+    $(function () {
+        var options = {
+            url: prefix + "/projectListManage",
+            pageSize:5,
+            queryParams: queryParams,
+            columns: [{
+                title: "序号",
+                formatter: function (value, row, index) {
+                    return $.table.serialNumber(index);
+                },
+                titleTooltip: false
+            },
+
+                {
+                    field : 'projectName',
+                    title : '项目名称',
+                    sortable: true,
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        return '<a href="javascript:void(0)" onclick="detail(\'' + row.projectId + '\')">' + value + '</a>';
+                    }
+                },
+                {
+                    field : 'projectEndTime',
+                    title : '项目结束时间',
+                    sortable: true,
+                    align: 'center'
+                },
+
+                {
+                    field: 'projectStatus',
+                    title: '项目状态',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        /*return $.table.selectDictLabel(datas, value);*/
+                        if(value==1){
+                            return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;text-align: center;width:150px;\">未开始</div>";
+                        }
+                        if(value==2){
+                            return "<div style=\"background:#24998d;color:#fff;border-radius:5px;text-align: center;width:150px;\">进行中</div>";
+                        }
+                        if(value==3){
+                            return "<div style=\"background:#cb99c5;color:#fff;border-radius:5px;text-align: center;width:150px;\">进行中已延期</div>";
+                        }
+                        if(value==4){
+                            return "<div style=\"background:#f0d264;color:#fff;border-radius:5px;text-align: center;width:150px;\">已完成</div>";
+                        }
+                        if(value==5){
+                            return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;text-align: center;width:150px;\">延期完成</div>";
+                        }
+                        if(value==6){
+                            return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;text-align: center;width:150px;\">已关闭</div>";
+                        }
+                    }
+                },
+                {
+                    field: 'projectProcess',
+                    title: '项目进度',
+                    sortable: true,
+                    formatter:function(value, row, index){
+                        //&nbsp;如果不放这个空格的话 页面就不显示了
+                        if(value==''){
+                            value=0;
+                            return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+                        }else  if(value<0 ){
+                            value=0;
+                            return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+                        }else if(value>100){
+                            value=100;
+                            return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+                        }else{
+                            return '<div style="float:left;background:#33CC33;color:#fff;width:'+value*0.7+'%">&nbsp;</div><div style="text-align: left;">'+value+'%</div>';
+                        }
+                    },
+                },
+
+                ]
+        };
+
+        $.table.init(options);
+
+        function queryParams(params) {
+            var search = $.table.queryParams(params);
+            search.id=[[${id}]]
+            return search;
+        }
+
+
+        var options = {
+            id: "bootstrap-table1",
+            url: prefix + "/taskListManage",
+            queryParams: queryParams,
+            pageSize:3,
+            columns: [{
+                title: "序号",
+                formatter: function (value, row, index) {
+                    return $.table.serialNumber(index);
+                }
+            },
+                {
+                    field : 'taskTitle',
+                    title : '任务名称',
+                    sortable: true,
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        return '<a href="javascript:void(0)" onclick="detailTask(\'' + row.taskId + '\')">' + value + '</a>';
+                    }
+                },
+
+                {
+                    field: 'taskEndTime',
+                    title: '截止日期',
+                    align: 'center',
+                    sortable: true
+                },
+                {
+                    field: 'taskStatus',
+                    title: '任务状态',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                       /* return $.table.selectDictLabel(datas, value);*/
+                        if(value==1){
+                            return "<div style=\"background:#6698cb;color:#fff;border-radius:5px;text-align: center;width:150px;\">创建任务</div>";
+                        }
+                        if(value==2){
+                            return "<div style=\"background:#24998d;color:#fff;border-radius:5px;text-align: center;width:150px;\">开始任务</div>";
+                        }
+                        if(value==3){
+                            return "<div style=\"background:#cb99c5;color:#fff;border-radius:5px;text-align: center;width:150px;\">提交任务</div>";
+                        }
+                        if(value==4){
+                            return "<div style=\"background:#f0d264;color:#fff;border-radius:5px;text-align: center;width:150px;\">任务审核</div>";
+                        }
+                        if(value==5){
+                            return "<div style=\"background:#fa5a5a;color:#fff;border-radius:5px;text-align: center;width:150px;\">任务结束</div>";
+                        }
+                    }
+                },
+
+            ]
+        };
+        $.table.init(options);
+    })
+
+    /*项目列表-详细*/
+    function detail(projectId) {
+        var url = prefix + '/detail/' + projectId;
+        $.modal.openTab("任务列表", url);
+    }
+
+
+    /*任务列表-详细*/
+    function detailTask(taskId) {
+        var url = prefix + '/detailTask/' + taskId;
+        $.modal.openTab("项目列表", url);
+    }
+</script>
+</body>
+</html>

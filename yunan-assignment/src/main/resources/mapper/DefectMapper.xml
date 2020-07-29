@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunan.assignment.mapper.DefectMapper">
+
+
+
+
+    <resultMap type="com.yunan.assignment.domain.Defect" id="BaseResultMap">
+        <id property="defectId"    column="defect_id"    />
+        <result property="defectTitle"    column="defect_title"    />
+        <result property="userId"    column="user_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="defectEndTime"    column="defect_end_time"    />
+        <result property="defectType"    column="defect_type"    />
+        <result property="defectStatus"    column="defect_status"    />
+        <result property="defectSeverity"    column="defect_severity"    />
+        <result property="defectReproSteps"    column="defect_repro_steps"    />
+        <result property="defectPriority"    column="defect_priority"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="userName"  column="user_name"/>
+        <result  property="projectName" column="project_name"/>
+        <result property="fileId" column="file_id"/>
+        <result property="fileName" column="file_name"></result>
+        <result property="filePath" column="file_path"></result>
+    </resultMap>
+
+
+
+
+    <resultMap id="sysUserMap" type="com.yunan.system.domain.SysUser">
+        <id property="userId" column="user_id"></id>
+        <result property="userName" column="user_name"></result>
+        <result property="loginName" column="login_name"></result>
+        <association property="dept" javaType="com.yunan.system.domain.SysDept">
+            <id property="deptId" column="dept_id"></id>
+            <result property="deptName" column="dept_name"></result>
+        </association>
+    </resultMap>
+
+
+    <sql id="select_project_user"  >
+
+    select  *  from  sys_user  su,manage_project  mp
+    where   su.user_id =mp.user_id
+
+    </sql>
+
+    <sql id="selectDefect"  >
+      SELECT
+        manage_defect.defect_id as defectId ,manage_defect.defect_title,manage_defect.defect_id,manage_defect.defect_end_time,manage_defect.defect_status,manage_defect.defect_type,manage_defect.defect_severity,manage_defect.defect_repro_steps,manage_defect.defect_priority,manage_defect.create_by,manage_defect.update_by,manage_defect.update_time,manage_defect.remark,manage_defect.create_time,
+        sys_user.user_id,sys_user.user_name, manage_project.project_id,manage_project.project_name, manage_file.file_id,manage_file.file_path,manage_file.file_name
+		FROM
+			manage_defect
+    </sql>
+    <sql id="selectDefect2"  >
+      SELECT
+        b.defect_id as defectId ,b.defect_title,b.defect_id,b.defect_end_time,b.defect_status,b.defect_type,b.defect_severity,b.defect_repro_steps,b.defect_priority,b.create_by,b.update_by,b.update_time,b.remark,b.create_time,
+        su.user_id,su.user_name, mp.project_id,mp.project_name, mf.file_id,mf.file_path,mf.file_name
+        FROM
+            manage_defect b
+    </sql>
+
+    <sql id="table">
+    sys_user  tem1,sys_dept  tem2
+    </sql>
+
+    <sql id="table2">
+    sys_user  su ,sys_user_role   sur
+    </sql>
+
+    <sql id="fields">
+    tem1.user_id,tem1.user_name,tem1.login_name,tem1.dept_id,tem2.dept_name
+    </sql>
+
+
+    <!--开发人员的列表-->
+    <sql id="conditions">
+    sur.user_id=su.user_id  and sur.role_id= 102 and su.status= 0 and su.del_flag='0'
+    </sql>
+
+    <!--实施人员的列表-->
+    <sql id="conditions2">
+    sur.user_id=su.user_id  and sur.role_id= 103 and su.status= 0 and su.del_flag='0'
+    </sql>
+
+    <sql id="join_condition">
+    LEFT JOIN manage_project   on  manage_defect.project_id=manage_project.project_id
+    LEFT JOIN sys_user   on  sys_user.user_id=manage_defect.user_id
+    LEFT JOIN manage_file   on  manage_file.file_id=manage_defect.file_id
+    </sql>
+
+    <sql id="join_condition2">
+    LEFT JOIN manage_project  mp  on  b.project_id=mp.project_id
+    LEFT JOIN sys_user  su  on  su.user_id=b.user_id
+    LEFT JOIN manage_file  mf on  mf.file_id=b.file_id
+    </sql>
+
+
+    <sql id="join_condition_other">
+    LEFT JOIN manage_project   on  manage_defect.project_id=manage_project.project_id
+    </sql>
+
+    <!--创建人员(实施和测试)的列表-->
+    <sql id="conditions_createBy">
+        sur.user_id=su.user_id  and sur.role_id  in (103,104)and su.status= 0 and su.del_flag='0'
+    </sql>
+    <!--创建人员(开发人员登录)的列表-->
+    <sql id="conditions_createByByTester">
+        sur.user_id=su.user_id  and sur.role_id  = 103 and su.status= 0 and su.del_flag='0'
+    </sql>
+
+    <!--创建人员(实施关联测试的bug列表)-->
+    <sql id="conditions_createByExecutorTester">
+        sur.user_id=su.user_id  and sur.role_id  = 104  and su.status= 0 and su.del_flag='0'
+    </sql>
+
+
+
+    <select id="selectDefectList" resultMap="BaseResultMap">
+        <include refid="selectDefect"></include>
+        <include refid="join_condition"></include>
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+<!--            <if test="defect.defectStatus != null ">-->
+<!--                AND manage_defect.defect_status = #{defect.defectStatus}-->
+<!--            </if>-->
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+
+        </where>
+
+
+    </select>
+
+
+    <insert id="insertDefect" useGeneratedKeys="true" keyProperty="defectId">
+
+        insert into manage_defect (
+        <if test="defectId != null ">defect_id,</if>
+        <if test="defectTitle != null and defectTitle != '' ">defect_title,</if>
+        <if test="userId != null  ">user_id,</if>
+        <if test="projectId != null and projectId != '' ">project_id,</if>
+        <if test="defectEndTime != null ">defect_end_time,</if>
+        <if test="defectType != null ">defect_type,</if>
+        <if test="defectStatus != null ">defect_status,</if>
+        <if test="defectSeverity != null ">defect_severity,</if>
+        <if test="defectReproSteps != null and defectReproSteps != ''">defect_repro_steps,</if>
+        <if test="defectPriority != null ">defect_priority,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateTime != null ">update_time,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="fileId != null ">file_id,</if>
+        create_time
+        )values(
+        <if test="defectId != null ">#{defectId},</if>
+        <if test="defectTitle != null and defectTitle != '' ">#{defectTitle},</if>
+        <if test="userId != null ">#{userId},</if>
+        <if test="projectId != null and projectId != '' ">#{projectId},</if>
+        <if test="defectEndTime != null ">#{defectEndTime},</if>
+        <if test="defectType != null ">#{defectType},</if>
+        <if test="defectStatus != null ">#{defectStatus},</if>
+        <if test="defectSeverity != null ">#{defectSeverity},</if>
+        <if test="defectReproSteps != null and defectReproSteps != ''">#{defectReproSteps},</if>
+        <if test="defectPriority != null ">#{defectPriority},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateTime != null ">#{updateTime},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="fileId != null ">#{fileId},</if>
+        sysdate()
+
+        )
+
+    </insert>
+
+
+    <!--
+    select tem1.user_id,tem1.login_name,tem1.user_name,tem1.dept_id,tem2.dept_name
+  from sys_user  tem1,sys_dept  tem2  where tem1.dept_id=tem2.dept_id  and tem2.dept_name='研发部门';
+
+    -->
+
+    <!--条件搜索框中的测试人员登录下的所有的开发人员-->
+    <select id="selectAssociatedCoderList" resultType="com.yunan.system.domain.SysUser">
+
+        select
+         su.*
+        from
+        <include refid="table2"></include>
+        where
+        <include refid="conditions"></include>
+
+    </select>
+    <select id="selectAssociatedProjectList" resultType="com.yunan.assignment.domain.Project">
+        select *  from manage_project
+
+    </select>
+
+    <!--
+    select tem1.user_id,tem1.login_name,tem1.user_name,tem1.dept_id,tem2.dept_name
+  from sys_user  tem1,sys_dept  tem2  where tem1.dept_id=tem2.dept_id  and tem2.dept_name='测试部门';
+
+    -->
+    <select id="createByList" resultMap="sysUserMap">
+        select
+        su.*
+        from
+        <include refid="table2"></include>
+        where <include refid="conditions_createBy"></include>
+
+
+    </select>
+    <delete id="deleteDefectByIds">
+        delete from manage_defect where defect_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="selectDefectById" resultMap="BaseResultMap">
+
+        select *  from manage_defect
+        <include refid="join_condition"></include>
+        where defect_id=#{defectId}
+
+    </select>
+    <update id="updateDefect">
+        update manage_defect
+        <set>
+            <if test="defectTitle != null and defectTitle != ''">defect_title = #{defectTitle},</if>
+            <if test="userId != null ">user_id = #{userId},</if>
+            <if test="projectId != null and projectId != ''">project_id = #{projectId},</if>
+            <if test="defectEndTime != null ">defect_end_time = #{defectEndTime},</if>
+            <if test="defectType != null ">defect_type = #{defectType},</if>
+            <if test="defectStatus != null ">defect_status = #{defectStatus},</if>
+            <if test="defectSeverity !=null ">defect_severity = #{defectSeverity},</if>
+            <if test="defectReproSteps != null and defectReproSteps != ''">defect_repro_steps = #{defectReproSteps},</if>
+            <if test="defectPriority != null ">defect_priority = #{defectPriority},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="fileId != null ">file_id = #{fileId},</if>
+            update_time = sysdate()
+        </set>
+        where defect_id = #{defectId}
+
+
+
+
+    </update>
+    <select id="selectSelfDefectList" resultMap="BaseResultMap">
+
+        <include refid="selectDefect"></include>
+        <include refid="join_condition"></include>
+
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+            AND manage_defect.user_id = #{userId}
+        </where>
+
+
+
+    </select>
+    <select id="selectCreateBySelfDefectList" resultMap="BaseResultMap">
+        <include refid="selectDefect"></include>
+        <include refid="join_condition"></include>
+
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+            <if test="userName != null and userName != ''">
+            AND manage_defect.create_by = #{userName}
+            </if>
+
+
+        </where>
+
+
+    </select>
+
+    <!--条件搜索框中的实施人员登录下的所有的测试人员-->
+    <select id="selectAssociatedTesterList" resultMap="sysUserMap">
+        select
+        su.*
+        from
+        <include refid="table2"></include>
+        where <include refid="conditions2"></include>
+
+    </select>
+
+
+
+
+    <!--查询测试列表中的测试创建的bug-->
+    <select id="selectCreateByTesterSelfDefectList" resultMap="BaseResultMap">
+
+        <include refid="selectDefect"/>
+        <include refid="join_condition"></include>
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND manage_defect.create_by = #{userName}
+            </if>
+
+        </where>
+
+    </select>
+
+
+    <!--查询测试列表中的测试和关联的实施创建给测试的bug-->
+    <select id="selectCreateBySelfAndExecutorDefectList" resultMap="BaseResultMap">
+
+        <include refid="selectDefect"/>
+        <include refid="join_condition"></include>
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND manage_defect.create_by = #{userName}
+            </if>
+
+        </where>
+        union
+        <include refid="selectDefect2"/>
+        <include refid="join_condition2"></include>
+        <where>
+            <if test="defect.userId != null ">
+                AND b.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND b.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND b.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND b.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND b.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND b.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND b.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND b.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND b.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND b.defect_type = #{defect.defectType}
+            </if>
+            <if test="userId != null  ">
+                and  b.user_id= #{userId}
+            </if>
+
+        </where>
+
+
+    </select>
+
+
+    <!--查询出项目下面的(开发经理下面的)所有人员-->
+    <select id="showAssociatedUser" resultType="com.yunan.system.domain.SysUser">
+
+
+        select *  from  sys_user su
+        where su.dept_id = (
+        select  sys_user.dept_id   from  sys_user  where sys_user.user_id =(SELECT
+        mp.user_id
+        FROM
+        manage_project mp
+        WHERE
+        mp.project_id = #{projectId} )  and  sys_user.status=0 and sys_user.del_flag='0'
+        )  and  su.status=0 and su.del_flag='0'
+
+    </select>
+
+
+    <!--查询出项目下面的(开发经理下面的)开发人员的bug列表-->
+    <select id="selectGrouperDefectList" resultMap="BaseResultMap">
+
+
+        <include refid="selectDefect"></include>
+        <include refid="join_condition"></include>
+
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+            AND manage_defect.user_id in (select su.user_id  from  sys_user su
+            where su.dept_id = (
+            select  sys_user.dept_id   from  sys_user  where sys_user.user_id =#{userId}
+            ))
+        </where>
+
+
+
+
+
+
+
+    </select>
+
+
+    <!--根据点击的项目id查询出项目中的测试人员-->
+    <select id="selectAssociatedTesterInProjectList" resultMap="sysUserMap">
+        select *  from  sys_user su,sys_user_role  sur
+        where su.dept_id = (
+        select  sys_user.dept_id   from  sys_user  where sys_user.user_id =(SELECT
+        mp.user_id
+        FROM
+        manage_project mp
+        WHERE
+        mp.project_id  = #{projectId} )  and  sys_user.status=0 and sys_user.del_flag='0'
+        )
+        and  su.status=0
+        and su.del_flag='0'  and sur.user_id=su.user_id  AND sur.role_id=103
+
+
+    </select>
+
+
+    <!--根据点击的项目id查询出项目中的开发人员-->
+    <select id="selectAssociatedCoderInProjectList" resultMap="sysUserMap">
+
+        select *  from  sys_user su,sys_user_role  sur
+        where su.dept_id = (
+        select  sys_user.dept_id   from  sys_user  where sys_user.user_id =(SELECT
+        mp.user_id
+        FROM
+        manage_project mp
+        WHERE
+        mp.project_id  = #{projectId} )  and  sys_user.status=0 and sys_user.del_flag='0'
+        )
+        and  su.status=0
+        and su.del_flag='0'  and sur.user_id=su.user_id  AND sur.role_id=102
+
+
+    </select>
+    <select id="selectAssociatedTesterIdsInProjectList" resultType="java.lang.String">
+
+    select  mp.tester_id   from  manage_project  mp  where  mp.project_id= #{projectId}
+    </select>
+    <select id="selectUserByUserId" resultType="com.yunan.system.domain.SysUser">
+
+        select *  from  sys_user  where  user_id = #{userId}
+    </select>
+
+    <!--查询这个userId是否是测试的角色-->
+    <select id="isTester" resultType="int">
+        select count(0) from  sys_user_role   where  user_id = #{userId} and role_id = 103
+    </select>
+
+    <select id="selectIfCreateByExecutor" resultType="java.lang.Integer">
+        select  count(0)  from  sys_user_role   sur
+        where  sur.user_id =
+       ( select  su.user_id  from  sys_user  su  where  su.user_name = #{createBy} )
+       and sur.role_id= 104
+
+
+    </select>
+    <select id="selectSysUserByUserId" resultType="com.yunan.system.domain.SysUser">
+        select  *  from  sys_user where user_id =#{userId}
+    </select>
+
+    <select id="selectExecutorDefectList" resultMap="BaseResultMap">
+        <include refid="selectDefect2"/>
+        <include refid="join_condition2"></include>
+        <where>
+        <if test="defect.userId != null ">
+            AND b.user_id = #{defect.userId}
+        </if>
+        <if test='defect.defectStatus == 2 '>
+            AND b.defect_status in (0,1,3)
+        </if>
+        <if test='defect.defectStatus == 3 '>
+            AND b.defect_status = 3
+        </if>
+        <if test='defect.defectStatus == 0 '>
+            AND b.defect_status = 0
+        </if>
+        <if test='defect.defectStatus == 1 '>
+            AND b.defect_status = 1
+        </if>
+        <if test="defect.defectSeverity != null ">
+            AND b.defect_severity = #{defect.defectSeverity}
+        </if>
+        <if test="defect.defectPriority != null ">
+            AND b.defect_priority = #{defect.defectPriority}
+        </if>
+        <if test="defect.createBy != null and defect.createBy != ''">
+            AND b.create_by = #{defect.createBy}
+        </if>
+        <if test="defect.projectId != null and defect.projectId != ''">
+            AND b.project_id = #{defect.projectId}
+        </if>
+        <if test="defect.defectType != null ">
+            AND b.defect_type = #{defect.defectType}
+        </if>
+        <if test="userId != null  ">
+            and  b.user_id= #{userId}
+        </if>
+        </where>
+
+
+
+    </select>
+
+
+    <select id="createByExecutorTesterList" resultMap="sysUserMap">
+        select
+        su.*
+        from
+        <include refid="table2"></include>
+        where <include refid="conditions_createByExecutorTester"></include>
+
+
+    </select>
+    <select id="createByTesterList" resultMap="sysUserMap">
+        select
+        su.*
+        from
+        <include refid="table2"></include>
+        where <include refid="conditions_createByByTester"></include>
+
+    </select>
+
+    <select id="selectDefectOfTesterList" resultMap="BaseResultMap">
+        <include refid="selectDefect"></include>
+        <include refid="join_condition"></include>
+        <where>
+            <if test="defect.userId != null ">
+                AND manage_defect.user_id = #{defect.userId}
+            </if>
+            <if test='defect.defectStatus == 2 '>
+                AND manage_defect.defect_status in (0,1,3)
+            </if>
+            <if test='defect.defectStatus == 3 '>
+                AND manage_defect.defect_status = 3
+            </if>
+            <if test='defect.defectStatus == 0 '>
+                AND manage_defect.defect_status = 0
+            </if>
+            <if test='defect.defectStatus == 1 '>
+                AND manage_defect.defect_status = 1
+            </if>
+            <if test="defect.defectSeverity != null ">
+                AND manage_defect.defect_severity = #{defect.defectSeverity}
+            </if>
+            <if test="defect.defectPriority != null ">
+                AND manage_defect.defect_priority = #{defect.defectPriority}
+            </if>
+            <if test="defect.createBy != null and defect.createBy != ''">
+                AND manage_defect.create_by = #{defect.createBy}
+            </if>
+            <if test="defect.projectId != null and defect.projectId != ''">
+                AND manage_defect.project_id = #{defect.projectId}
+            </if>
+            <if test="defect.defectType != null ">
+                AND manage_defect.defect_type = #{defect.defectType}
+            </if>
+             and manage_defect.user_id in(
+            SELECT
+            su.user_id
+            FROM
+            sys_user su,sys_user_role sur
+            WHERE
+            su.user_id=sur.user_id  and
+            sur.role_id= 102
+            and su.status=0 and su.del_flag='0'
+
+            )
+
+        </where>
+
+
+
+    </select>
+
+
+</mapper>

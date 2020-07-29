@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunan.assignment.mapper.SoftwareMapper">
+    
+    <resultMap type="Software" id="SoftwareResult">
+        <result property="softwareId"    column="software_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="softwareVersion"    column="software_version"    />
+        <result property="svn_path"    column="svnPath"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectSoftwareVo">
+        select software_id, project_id, software_version, svnPath, create_by, create_time, update_by, update_time, remark from manage_software
+    </sql>
+
+    <insert id="insertSoftware" parameterType="Software">
+        insert into manage_software
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null and projectId != ''">project_id,</if>
+            <if test="softwareVersion != null and softwareVersion != ''">software_version,</if>
+            <if test="svnPath != null and svnPath != ''">svn_path,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null and projectId != ''">#{projectId},</if>
+            <if test="softwareVersion != null and softwareVersion != ''">#{softwareVersion},</if>
+            <if test="svnPath != null and svnPath != ''">#{svnPath},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            sysdate()
+         </trim>
+    </insert>
+    <delete id="deleteSoftwareById" parameterType="String">
+        delete from manage_software where project_id = #{projectId}
+    </delete>
+
+    <delete id="deleteSoftwareByIds" parameterType="String">
+        delete from manage_software where project_id in
+        <foreach item="projectId" collection="array" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+
+    <update id="updateSoftware" parameterType="Software">
+        update manage_software
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="softwareVersion != null and softwareVersion != ''">software_version=#{softwareVersion},</if>
+            svn_path=#{svnPath},
+            <if test="updateBy != null and updateBy != ''">update_by=#{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where project_id = #{projectId}
+    </update>
+
+
+</mapper>
